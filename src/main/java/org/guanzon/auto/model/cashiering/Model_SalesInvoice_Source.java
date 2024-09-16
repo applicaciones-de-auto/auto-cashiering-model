@@ -6,6 +6,7 @@
 package org.guanzon.auto.model.cashiering;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -23,8 +24,8 @@ import org.json.simple.JSONObject;
  *
  * @author Arsiela
  */
-public class Model_VehicleSalesInvoice_Source implements GEntity {
-    final String XML = "Model_VehicleSalesInvoice_Source.xml";
+public class Model_SalesInvoice_Source implements GEntity {
+    final String XML = "Model_SalesInvoice_Source.xml";
 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -36,7 +37,7 @@ public class Model_VehicleSalesInvoice_Source implements GEntity {
      *
      * @param foValue - GhostRider Application Driver
      */
-    public Model_VehicleSalesInvoice_Source(GRider foValue) {
+    public Model_SalesInvoice_Source(GRider foValue) {
         if (foValue == null) {
             System.err.println("Application Driver is not set.");
             System.exit(1);
@@ -295,7 +296,7 @@ public class Model_VehicleSalesInvoice_Source implements GEntity {
                     poJSON.put("message", "No record to save.");
                 }
             } else {
-                Model_VehicleSalesInvoice_Source loOldEntity = new Model_VehicleSalesInvoice_Source (poGRider);
+                Model_SalesInvoice_Source loOldEntity = new Model_SalesInvoice_Source (poGRider);
 
                 //replace with the primary key column info
                 JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
@@ -387,9 +388,16 @@ public class Model_VehicleSalesInvoice_Source implements GEntity {
     }
     
     private String getSQL(){
-        return "SELECT" +
-                    " a.sTransNox" +  
-                "";
+        return    " SELECT "               
+                + "    sTransNox "         
+                + "  , sReferNox "         
+                + "  , sSourceCD "         
+                + "  , sSourceNo "         
+                + "  , sTranType "         
+                + "  , nTranAmtx "         
+                + "  , nDiscount "         
+                + "  , nAdvusedx "         
+                + " FROM si_master_source ";
     }
     
     /**
@@ -415,202 +423,129 @@ public class Model_VehicleSalesInvoice_Source implements GEntity {
      * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setModelDsc(String fsValue) {
-        return setValue("sModelDsc", fsValue);
+    public JSONObject setReferNo(String fsValue) {
+        return setValue("sReferNox", fsValue);
     }
 
     /**
      * @return The ID of this record.
      */
-    public String getModelDsc() {
-        return (String) getValue("sModelDsc");
+    public String getReferNo() {
+        return (String) getValue("sReferNox");
+    }
+    
+    /**
+     * Description: Sets the ID of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setSourceCD(String fsValue) {
+        return setValue("sSourceCD", fsValue);
+    }
+
+    /**
+     * @return The ID of this record.
+     */
+    public String getSourceCD() {
+        return (String) getValue("sSourceCD");
+    }
+    
+    /**
+     * Description: Sets the ID of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setSourceNo(String fsValue) {
+        return setValue("sSourceNo", fsValue);
+    }
+
+    /**
+     * @return The ID of this record.
+     */
+    public String getSourceNo() {
+        return (String) getValue("sSourceNo");
+    }
+    
+    /**
+     * Description: Sets the ID of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setTranType(String fsValue) {
+        return setValue("sTranType", fsValue);
+    }
+
+    /**
+     * @return The ID of this record.
+     */
+    public String getTranType() {
+        return (String) getValue("sTranType");
     }
     
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fsValue
+     * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setMakeDesc(String fsValue) {
-        return setValue("sMakeDesc", fsValue);
+    public JSONObject setTranAmt(BigDecimal fdbValue) {
+        return setValue("nTranAmtx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public String getMakeDesc() {
-        return (String) getValue("sMakeDesc");
+    public BigDecimal getTranAmt() {
+        if(getValue("nTranAmtx") == null || getValue("nTranAmtx").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nTranAmtx")));
+        }
     }
     
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fsValue
+     * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setUnitType(String fsValue) {
-        return setValue("sUnitType", fsValue);
+    public JSONObject setDiscount(BigDecimal fdbValue) {
+        return setValue("nDiscount", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public String getUnitType() {
-        return (String) getValue("sUnitType");
+    public BigDecimal getDiscount() {
+        if(getValue("nDiscount") == null || getValue("nDiscount").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nDiscount")));
+        }
     }
     
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fsValue
+     * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setBodyType(String fsValue) {
-        return setValue("sBodyType", fsValue);
+    public JSONObject setAdvused(BigDecimal fdbValue) {
+        return setValue("nAdvusedx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public String getBodyType() {
-        return (String) getValue("sBodyType");
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setVhclSize(String fsValue) {
-        return setValue("cVhclSize", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getVhclSize() {
-        return (String) getValue("cVhclSize");
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setModelCde(String fsValue) {
-        return setValue("sModelCde", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getModelCde() {
-        return (String) getValue("sModelCde");
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setRecdStat(String fsValue) {
-        return setValue("cRecdStat", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String gsetRecdStat() {
-        return (String) getValue("cRecdStat");
-    }
-    
-    /**
-     * Sets record as active.
-     *
-     * @param fbValue
-     * @return result as success/failed
-     */
-    public JSONObject setActive(boolean fbValue) {
-        return setValue("cRecdStat", fbValue ? "1" : "0");
-    }
-
-    /**
-     * @return If record is active.
-     */
-    public boolean isActive() {
-        return ((String) getValue("cRecdStat")).equals("1");
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setEntryBy(String fsValue) {
-        return setValue("sEntryByx", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getEntryBy() {
-        return (String) getValue("sEntryByx");
-    }
-    
-    /**
-     * Sets the date and time the record was modified.
-     *
-     * @param fdValue
-     * @return result as success/failed
-     */
-    public JSONObject setEntryDte(Date fdValue) {
-        return setValue("dEntryDte", fdValue);
-    }
-
-    /**
-     * @return The date and time the record was modified.
-     */
-    public Date getEntryDte() {
-        return (Date) getValue("dEntryDte");
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setModified(String fsValue) {
-        return setValue("sModified", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getModified() {
-        return (String) getValue("sModified");
-    }
-    
-    /**
-     * Sets the date and time the record was modified.
-     *
-     * @param fdValue
-     * @return result as success/failed
-     */
-    public JSONObject setModifiedDte(Date fdValue) {
-        return setValue("dModified", fdValue);
-    }
-
-    /**
-     * @return The date and time the record was modified.
-     */
-    public Date getModifiedDte() {
-        return (Date) getValue("dModified");
+    public BigDecimal getAdvused() {
+        if(getValue("nAdvusedx") == null || getValue("nAdvusedx").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nAdvusedx")));
+        }
     }
     
     
