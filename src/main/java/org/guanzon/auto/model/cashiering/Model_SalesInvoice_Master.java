@@ -62,12 +62,9 @@ public class Model_SalesInvoice_Master implements GEntity {
 
             MiscUtil.initRowSet(poEntity);        
             poEntity.updateObject("dTransact", poGRider.getServerDate()); 
-            poEntity.updateObject("dVSPDatex", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));  
-            poEntity.updateObject("dDelvryDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));  
             poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN); //TransactionStatus.STATE_OPEN why is the value of STATE_OPEN is 0 while record status active is 1
             //RecordStatus.ACTIVE
-            poEntity.updateString("cCustType", "0");  
-            poEntity.updateString("cIsVhclNw", "0");  
+            //poEntity.updateString("cCustType", "0");  
             
             poEntity.updateBigDecimal("nGrossAmt", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nDiscount", new BigDecimal("0.00"));
@@ -418,7 +415,7 @@ public class Model_SalesInvoice_Master implements GEntity {
         return MiscUtil.makeSelect(this);
     }
     
-    private String getSQL(){
+    public String getSQL(){
         return    " SELECT "                                                                                                       
                 + "    a.sTransNox "                                                                                               
                 + "  , a.sBranchCd "                                                                                               
@@ -470,8 +467,8 @@ public class Model_SalesInvoice_Master implements GEntity {
                 + " LEFT JOIN towncity f ON f.sTownIDxx = d.sTownIDxx  "                                                           
                 + " LEFT JOIN province g ON g.sProvIDxx = f.sProvIDxx  "                                                           
                 + " LEFT JOIN client_mobile ba ON ba.sClientID = b.sClientID AND ba.cPrimaryx = 1 "                                
-                + " LEFT JOIN client_email_address bb ON bb.sClientID = b.sClientID AND bb.cPrimaryx = 1 "
-                + " LEFT JOIN si_master_source h ON h.sTransNox = a.sTransNox " ;
+                + " LEFT JOIN client_email_address bb ON bb.sClientID = b.sClientID AND bb.cPrimaryx = 1 ";
+               // + " LEFT JOIN si_master_source h ON h.sTransNox = a.sTransNox " ;
 //                "SELECT                                 " +                                                    
 //                "  IFNULL(a.sTransNox,'') AS sTransNox, " +                                                    
 //                "  IFNULL(a.sBranchCd,'') AS sBranchCd, " +                                                    
