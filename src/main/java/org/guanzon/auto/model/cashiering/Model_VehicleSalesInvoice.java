@@ -24,20 +24,22 @@ import org.json.simple.JSONObject;
  *
  * @author Arsiela
  */
-public class Model_SalesInvoice_Source implements GEntity {
-    final String XML = "Model_SalesInvoice_Source.xml";
+public class Model_VehicleSalesInvoice implements GEntity {
+    final String XML = "Model_VehicleSalesInvoice.xml";
 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
     JSONObject poJSON;              //json container
     int pnEditMode;                 //edit mode
+    String psExclude = "sUDRNoxxx»cCustType»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclFDsc»sVhclDesc»sColorDsc»sCoCltNmx»sSENamexx";
+    private String psTargetBranchCd = "";
 
     /**
      * Entity constructor
      *
      * @param foValue - GhostRider Application Driver
      */
-    public Model_SalesInvoice_Source(GRider foValue) {
+    public Model_VehicleSalesInvoice(GRider foValue) {
         if (foValue == null) {
             System.err.println("Application Driver is not set.");
             System.exit(1);
@@ -56,7 +58,11 @@ public class Model_SalesInvoice_Source implements GEntity {
             poEntity.moveToInsertRow();
 
             MiscUtil.initRowSet(poEntity);
-            poEntity.updateString("cRecdStat", RecordStatus.ACTIVE);
+            
+            poEntity.updateBigDecimal("nTranAmtx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nDiscount", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nAdvusedx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nNetAmtxx", new BigDecimal("0.00"));
 
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -124,7 +130,7 @@ public class Model_SalesInvoice_Source implements GEntity {
 
     @Override
     public String getTable() {
-        return "si_source";
+        return "si_master_source";
     }
 
     /**
@@ -219,28 +225,32 @@ public class Model_SalesInvoice_Source implements GEntity {
     public JSONObject newRecord() {
         pnEditMode = EditMode.ADDNEW;
 
-        //replace with the primary key column info
-        setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
-
         poJSON = new JSONObject();
         poJSON.put("result", "success");
         return poJSON;
     }
+    
+    @Override
+    public JSONObject openRecord(String string) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 
     /**
      * Opens a record.
      *
-     * @param fsCondition - filter values
+     * @param fsValue - filter values
+     * @param fnValue - filter values
      * @return result as success/failed
      */
-    @Override
-    public JSONObject openRecord(String fsCondition) {
+    public JSONObject openRecord(String fsValue, int fnValue) {
         poJSON = new JSONObject();
 
-        String lsSQL = MiscUtil.makeSelect(this);
+        String lsSQL = makeSelectSQL();
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsCondition));
+        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsValue) 
+                                                + " AND nEntryNox = " + SQLUtil.toSQL(fnValue));
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -265,7 +275,6 @@ public class Model_SalesInvoice_Source implements GEntity {
 
         return poJSON;
     }
-
     /**
      * Save the entity.
      *
@@ -279,12 +288,12 @@ public class Model_SalesInvoice_Source implements GEntity {
             String lsSQL;
             if (pnEditMode == EditMode.ADDNEW) {
                 //replace with the primary key column info
-                setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+                //setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
 
                 lsSQL = makeSQL();
 
                 if (!lsSQL.isEmpty()) {
-                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
                         poJSON.put("result", "success");
                         poJSON.put("message", "Record saved successfully.");
                     } else {
@@ -296,17 +305,18 @@ public class Model_SalesInvoice_Source implements GEntity {
                     poJSON.put("message", "No record to save.");
                 }
             } else {
-                Model_SalesInvoice_Source loOldEntity = new Model_SalesInvoice_Source (poGRider);
+                Model_VehicleSalesInvoice loOldEntity = new Model_VehicleSalesInvoice (poGRider);
 
                 //replace with the primary key column info
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(),this.getEntryNo());
 
                 if ("success".equals((String) loJSON.get("result"))) {
                     //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()));
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
+                                                                                + " AND nEntryNox = " + SQLUtil.toSQL(this.getEntryNo()), psExclude);
 
                     if (!lsSQL.isEmpty()) {
-                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
                             poJSON.put("result", "success");
                             poJSON.put("message", "Record saved successfully.");
                         } else {
@@ -330,6 +340,14 @@ public class Model_SalesInvoice_Source implements GEntity {
         }
 
         return poJSON;
+    }
+    
+    public void setTargetBranchCd(String fsBranchCd){
+        if (!poGRider.getBranchCode().equals(fsBranchCd)){
+            psTargetBranchCd = fsBranchCd;
+        } else {
+            psTargetBranchCd = "";
+        }
     }
 
     /**
@@ -375,7 +393,7 @@ public class Model_SalesInvoice_Source implements GEntity {
      * @return SQL Statement
      */
     public String makeSQL() {
-        return MiscUtil.makeSQL(this, "");
+        return MiscUtil.makeSQL(this, psExclude);
     }
     
     /**
@@ -384,20 +402,51 @@ public class Model_SalesInvoice_Source implements GEntity {
      * @return SQL Select Statement
      */
     public String makeSelectSQL() {
-        return MiscUtil.makeSelect(this);
+        return MiscUtil.makeSelect(this, psExclude);
     }
     
     private String getSQL(){
-        return    " SELECT "               
-                + "    sTransNox "         
-                + "  , sReferNox "         
-                + "  , sSourceCD "         
-                + "  , sSourceNo "         
-                + "  , sTranType "         
-                + "  , nTranAmtx "         
-                + "  , nDiscount "         
-                + "  , nAdvusedx "         
-                + " FROM si_master_source ";
+        return   " SELECT "               
+                + "    a.sTransNox "         
+                + "  , a.sReferNox "         
+                + "  , a.sSourceCD "         
+                + "  , a.sSourceNo "         
+                + "  , a.sTranType "         
+                + "  , a.nTranAmtx "         
+                + "  , a.nDiscount "         
+                + "  , a.nAdvusedx "          
+                + "  , a.nNetAmtxx "         
+                + "  , a.nEntryNox "      
+                  /*VDR INFORMATION*/
+                + "  , b.sReferNox AS sUDRNoxxx " 
+                + "  , b.cCustType AS cCustType "     
+                  /*VEHICLE INFORMATION*/                                                         
+                + " , c.sCSNoxxxx "                                                               
+                + " , d.sPlateNox "                                                               
+                + " , c.sFrameNox "                                                               
+                + " , c.sEngineNo "                                                               
+                + " , c.sKeyNoxxx "                                                               
+                + " , e.sDescript AS sVhclFDsc " 
+                + " , TRIM(CONCAT_WS(' ',f.sMakeDesc, g.sModelDsc, h.sTypeDesc, e.sTransMsn, e.nYearModl )) AS sVhclDesc "
+                + " , i.sColorDsc "
+                + " , k.sCompnyNm AS sCoCltNmx "                                               
+                + " , m.sCompnyNm AS sSENamexx "  
+                + " FROM si_master_source a "   
+                  /*VDR INFORMATION*/
+                + " LEFT JOIN udr_master b ON b.sTransNox = a.sReferNox"     
+                 /*VEHICLE INFORMATION*/                                                          
+                + " LEFT JOIN vehicle_serial c ON c.sSerialID = b.sSerialID "                     
+                + " LEFT JOIN vehicle_serial_registration d ON d.sSerialID = b.sSerialID "        
+                + " LEFT JOIN vehicle_master e ON e.sVhclIDxx = c.sVhclIDxx " 
+                + " LEFT JOIN vehicle_make f ON f.sMakeIDxx = e.sMakeIDxx  "
+                + " LEFT JOIN vehicle_model g ON g.sModelIDx = e.sModelIDx "
+                + " LEFT JOIN vehicle_type h ON h.sTypeIDxx = e.sTypeIDxx  "
+                + " LEFT JOIN vehicle_color i ON i.sColorIDx = e.sColorIDx " 
+                 /*CO CLIENT*/                                                  
+                + " LEFT JOIN vsp_master j ON j.sTransNox = b.sSourceNo "                                        
+                + " LEFT JOIN client_master k ON k.sClientID = j.sCoCltIDx "  
+                + " LEFT JOIN customer_inquiry l ON l.sTransNox = j.sInqryIDx " 
+                + " LEFT JOIN ggc_isysdbf.client_master m ON m.sClientID = l.sEmployID    " ;  
     }
     
     /**
@@ -548,5 +597,228 @@ public class Model_SalesInvoice_Source implements GEntity {
         }
     }
     
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setNetAmt(BigDecimal fdbValue) {
+        return setValue("nNetAmtxx", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getNetAmt() {
+        if(getValue("nNetAmtxx") == null || getValue("nNetAmtxx").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nNetAmtxx")));
+        }
+    }
     
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fnValue
+     * @return result as success/failed
+     */
+    public JSONObject setEntryNo(Integer fnValue) {
+        return setValue("nEntryNox", fnValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Integer getEntryNo() {
+        return Integer.parseInt(String.valueOf(getValue("nEntryNox")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setUDRNo(String fsValue) {
+        return setValue("sUDRNoxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getUDRNo() {
+        return (String) getValue("sUDRNoxxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setCustType(String fsValue) {
+        return setValue("cCustType", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCustType() {
+        return (String) getValue("cCustType");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setCSNo(String fsValue) {
+        return setValue("sCSNoxxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCSNo() {
+        return (String) getValue("sCSNoxxxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setPlateNo(String fsValue) {
+        return setValue("sPlateNox", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getPlateNo() {
+        return (String) getValue("sPlateNox");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setFrameNo(String fsValue) {
+        return setValue("sFrameNox", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getFrameNo() {
+        return (String) getValue("sFrameNox");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setEngineNo(String fsValue) {
+        return setValue("sEngineNo", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getEngineNo() {
+        return (String) getValue("sEngineNo");
+    }
+                                                        
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setVhclFDsc(String fsValue) {
+        return setValue("sVhclFDsc", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getVhclFDsc() {
+        return (String) getValue("sVhclFDsc");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setColorDsc(String fsValue) {
+        return setValue("sColorDsc", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getColorDsc() {
+        return (String) getValue("sColorDsc");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setVhclDesc(String fsValue) {
+        return setValue("sVhclDesc", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getVhclDesc() {
+        return (String) getValue("sVhclDesc");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setCoCltNm(String fsValue) {
+        return setValue("sCoCltNmx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCoCltNm() {
+        return (String) getValue("sCoCltNmx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setSEName(String fsValue) {
+        return setValue("sSENamexx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getSEName() {
+        return (String) getValue("sSENamexx");
+    }
 }

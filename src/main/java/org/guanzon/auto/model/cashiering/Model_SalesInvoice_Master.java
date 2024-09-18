@@ -17,7 +17,6 @@ import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
-import org.guanzon.appdriver.constant.RecordStatus;
 import org.guanzon.appdriver.constant.TransactionStatus;
 import org.guanzon.appdriver.iface.GEntity;
 import org.json.simple.JSONObject;
@@ -27,10 +26,10 @@ import org.json.simple.JSONObject;
  * @author Arsiela
  */
 public class Model_SalesInvoice_Master implements GEntity {
-    final String XML = "Model_VehicleSalesInvoice_Master.xml";
+    final String XML = "Model_SalesInvoice_Master.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
-    private String psExclude = "";//» 
+    private String psExclude = "sTranStat»sBuyCltNm»cClientTp»sTaxIDNox»sAddressx";//»  
     
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -63,12 +62,23 @@ public class Model_SalesInvoice_Master implements GEntity {
             MiscUtil.initRowSet(poEntity);        
             poEntity.updateObject("dTransact", poGRider.getServerDate()); 
             poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN); //TransactionStatus.STATE_OPEN why is the value of STATE_OPEN is 0 while record status active is 1
-            //RecordStatus.ACTIVE
-            //poEntity.updateString("cCustType", "0");  
-            
-            poEntity.updateBigDecimal("nGrossAmt", new BigDecimal("0.00"));
-            poEntity.updateBigDecimal("nDiscount", new BigDecimal("0.00"));
+             
             poEntity.updateBigDecimal("nTranTotl", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nDiscount", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nVatSales", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nVatAmtxx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nNonVATSl", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nZroVATSl", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nCWTAmtxx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("cWTRatexx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nNetTotal", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nCashAmtx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nChckAmtx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nCardAmtx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nOthrAmtx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nGiftAmtx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nAmtPaidx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nAdvPaymx", new BigDecimal("0.00"));
 
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -229,9 +239,8 @@ public class Model_SalesInvoice_Master implements GEntity {
         pnEditMode = EditMode.ADDNEW;
 
         //replace with the primary key column info
-        setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"SI"));
-//        setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
-//        setTransactDte(poGRider.getServerDate());
+        setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"S"));
+        setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
         
         poJSON = new JSONObject();
         poJSON.put("result", "success");
@@ -291,8 +300,8 @@ public class Model_SalesInvoice_Master implements GEntity {
             String lsSQL; //nRsvAmtTl
             if (pnEditMode == EditMode.ADDNEW) {
                 //replace with the primary key column info
-                setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"SI"));
-//                setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+                setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"S"));
+                setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
                 setModifiedBy(poGRider.getUserID());
                 setModifiedDte(poGRider.getServerDate());
                 
@@ -349,15 +358,15 @@ public class Model_SalesInvoice_Master implements GEntity {
     }
 
     private String getTargetBranchCd(){
-//        if(getBranchCD() != null) {
-//            if (!poGRider.getBranchCode().equals(getBranchCD())){
-//                return getBranchCD();
-//            } else {
-//                return "";
-//            }
-//        } else {
+        if(getBranchCd() != null) {
+            if (!poGRider.getBranchCode().equals(getBranchCd())){
+                return getBranchCd();
+            } else {
+                return "";
+            }
+        } else {
             return "";
-//        }
+        }
     }
     
     /**
@@ -412,7 +421,7 @@ public class Model_SalesInvoice_Master implements GEntity {
      * @return SQL Select Statement
      */
     public String makeSelectSQL() {
-        return MiscUtil.makeSelect(this);
+        return MiscUtil.makeSelect(this, psExclude);
     }
     
     public String getSQL(){
@@ -452,7 +461,8 @@ public class Model_SalesInvoice_Master implements GEntity {
                 + "    END AS sTranStat "                                                                                          
                 /*BUYING COSTUMER*/                                                                                                
                 + " , b.sCompnyNm AS sBuyCltNm "                                                                                   
-                + " , b.cClientTp              "                                                                                   
+                + " , b.cClientTp              "                                                                                  
+                + " , b.sTaxIDNox              "                                                                                    
                 + " , TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), "                                                  
                 + "    IFNULL(CONCAT(d.sAddressx,' ') , ''),                    "                                                  
                 + "    IFNULL(CONCAT(e.sBrgyName,' '), ''),                     "                                                  
@@ -467,48 +477,7 @@ public class Model_SalesInvoice_Master implements GEntity {
                 + " LEFT JOIN towncity f ON f.sTownIDxx = d.sTownIDxx  "                                                           
                 + " LEFT JOIN province g ON g.sProvIDxx = f.sProvIDxx  "                                                           
                 + " LEFT JOIN client_mobile ba ON ba.sClientID = b.sClientID AND ba.cPrimaryx = 1 "                                
-                + " LEFT JOIN client_email_address bb ON bb.sClientID = b.sClientID AND bb.cPrimaryx = 1 ";
-               // + " LEFT JOIN si_master_source h ON h.sTransNox = a.sTransNox " ;
-//                "SELECT                                 " +                                                    
-//                "  IFNULL(a.sTransNox,'') AS sTransNox, " +                                                    
-//                "  IFNULL(a.sBranchCd,'') AS sBranchCd, " +                                                    
-//                "  a.dTransact,                         " +                                                    
-//                "  IFNULL(a.cDocTypex,'') AS cDocTypex, " +                                                    
-//                "  IFNULL(a.sReferNox,'') AS sReferNox, " +                                                    
-//                "  IFNULL(a.sClientID,'') AS sClientID, " +                                                    
-//                "  a.nTranTotl,                         " +                                                    
-//                "  a.nDiscount,                         " +                                                    
-//                "  a.nVatSales,                         " +                                                    
-//                "  a.nVatAmtxx,                         " +                                                    
-//                "  a.nNonVATSl,                         " +                                                    
-//                "  a.nZroVATSl,                         " +                                                    
-//                "  IFNULL(a.cWTRatexx,'') AS cWTRatexx, " +                                                    
-//                "  a.nCWTAmtxx,                         " +                                                    
-//                "  a.nAdvPaymx,                         " +                                                    
-//                "  a.nNetTotal,                         " +                                                    
-//                "  a.nCashAmtx,                         " +                                                    
-//                "  a.nChckAmtx,                         " +                                                    
-//                "  a.nCardAmtx,                         " +                                                    
-//                "  a.nOthrAmtx,                         " +                                                    
-//                "  a.nGiftAmtx,                         " +                                                    
-//                "  a.nAmtPaidx,                         " +                                                    
-//                "  IFNULL(a.cPrintedx,'') AS cPrintedx, " +                                                    
-//                "  IFNULL(a.cTranStat,'') AS cTranStat, " +                                                    
-//                "  IFNULL(a.sModified,'') AS sModified, " +                                                    
-//                "  a.dModified,                         " +                                                    
-//                "  IFNULL(b.sCompnyNm,'') AS sCompnyNm, " +                                                    
-//                "IFNULL(CONCAT( IFNULL(CONCAT(cc.sHouseNox,' ') , ''),  " +                                    
-//                "IFNULL(CONCAT(cc.sAddressx,' ') , ''),                 " +                                    
-//                "IFNULL(CONCAT(d.sBrgyName,' '), ''),                   " +                                    
-//                "IFNULL(CONCAT(e.sTownName, ', '),''),                  " +                                    
-//                "IFNULL(CONCAT(f.sProvName),'') ) , '') AS sAddressx    " +                                    
-//                "FROM si_master a                                       " +                                    
-//                "LEFT JOIN client_master b ON b.sClientID = a.sClientID " +                                    
-//                "LEFT JOIN client_address c ON c.sClientID = a.sClientID AND c.cPrimaryx = '1'  " +            
-//                "LEFT JOIN addresses cc ON cc.sAddrssID = c.sAddrssID   " +                                    
-//                "LEFT JOIN barangay d ON d.sBrgyIDxx = cc.sBrgyIDxx     " +                                   
-//                "LEFT JOIN towncity e ON e.sTownIDxx = cc.sTownIDxx     " +                                   
-//                "LEFT JOIN province f ON f.sProvIDxx = e.sProvIDxx      " ;                                   
+                + " LEFT JOIN client_email_address bb ON bb.sClientID = b.sClientID AND bb.cPrimaryx = 1 ";                           
     }
     
     /**
@@ -1033,6 +1002,40 @@ public class Model_SalesInvoice_Master implements GEntity {
      */
     public String getBuyCltNm() {
         return (String) getValue("sBuyCltNm");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setClientTp(String fsValue) {
+        return setValue("cClientTp", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getClientTp() {
+        return (String) getValue("cClientTp");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setTaxIDNo(String fsValue) {
+        return setValue("sTaxIDNox", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getTaxIDNo() {
+        return (String) getValue("sTaxIDNox");
     }
     
     /**
