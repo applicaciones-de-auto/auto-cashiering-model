@@ -11,6 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sql.rowset.CachedRowSet;
 import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
@@ -31,7 +33,8 @@ public class Model_VehicleSalesInvoice implements GEntity {
     CachedRowSet poEntity;          //rowset
     JSONObject poJSON;              //json container
     int pnEditMode;                 //edit mode
-    String psExclude = "sUDRNoxxx»cCustType»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclFDsc»sVhclDesc»sColorDsc»sCoCltNmx»sSENamexx";
+    String psExclude = "sUDRNoxxx»cCustType»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclFDsc»sVhclDesc»sColorDsc»sCoCltNmx»sSENamexx"
+                     + "»nUnitPrce»nPromoDsc»nFleetDsc»nSPFltDsc»nBndleDsc»nAddlDscx";
     private String psTargetBranchCd = "";
 
     /**
@@ -63,6 +66,14 @@ public class Model_VehicleSalesInvoice implements GEntity {
             poEntity.updateBigDecimal("nDiscount", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nAdvusedx", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nNetAmtxx", new BigDecimal("0.00"));
+            
+            
+            poEntity.updateBigDecimal("nUnitPrce", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nPromoDsc", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nFleetDsc", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nSPFltDsc", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nBndleDsc", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nAddlDscx", new BigDecimal("0.00"));
 
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -387,6 +398,65 @@ public class Model_VehicleSalesInvoice implements GEntity {
 
     }
     
+    //Get vat rate thru standardsets
+    public Double getVatRate(){
+        JSONObject loJSON = new JSONObject();
+        
+        String ldblValue = "0.00";
+        try {
+            //Vat Rate
+            String lsStandardSets = "SELECT sValuexxx FROM xxxstandard_sets WHERE sDescript = 'vat_percent'";
+            System.out.println("CHECK STANDARD SETS FROM vat_percent : " + lsStandardSets);
+            ResultSet loRS = poGRider.executeQuery(lsStandardSets);
+            if (MiscUtil.RecordCount(loRS) > 0){
+                    while(loRS.next()){
+                        ldblValue = loRS.getString("sValuexxx");
+                    }
+
+                    MiscUtil.close(loRS);
+                    return Double.valueOf(ldblValue);
+            }else {
+//                loJSON.put("result", "error");
+//                loJSON.put("message", "Notify System Administrator to config Standard set for `vat_percent`.");
+                return 0.00;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Model_VehicleSalesInvoice.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return Double.valueOf(ldblValue);
+        
+    }
+    
+    
+    public Double getBasePriceWVatPercent(){
+        JSONObject loJSON = new JSONObject();
+        
+        String ldblValue = "0.00";
+        try {
+            //Vat Rate
+            String lsStandardSets = "SELECT sValuexxx FROM xxxstandard_sets WHERE sDescript = 'baseprice_with_vat_percent'";
+            System.out.println("CHECK STANDARD SETS FROM vat_percent : " + lsStandardSets);
+            ResultSet loRS = poGRider.executeQuery(lsStandardSets);
+            if (MiscUtil.RecordCount(loRS) > 0){
+                while(loRS.next()){
+                    ldblValue = loRS.getString("sValuexxx");
+                }
+
+                MiscUtil.close(loRS);
+            }else {
+//                loJSON.put("result", "error");
+//                loJSON.put("message", "Notify System Administrator to config Standard set for `baseprice_with_vat_percent`.");
+//                return loJSON;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Model_VehicleSalesInvoice.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return Double.valueOf(ldblValue);
+        
+    }
+    
     /**
      * Gets the SQL statement for this entity.
      *
@@ -430,7 +500,13 @@ public class Model_VehicleSalesInvoice implements GEntity {
                 + " , TRIM(CONCAT_WS(' ',f.sMakeDesc, g.sModelDsc, h.sTypeDesc, e.sTransMsn, e.nYearModl )) AS sVhclDesc "
                 + " , i.sColorDsc "
                 + " , k.sCompnyNm AS sCoCltNmx "                                               
-                + " , m.sCompnyNm AS sSENamexx "  
+                + " , m.sCompnyNm AS sSENamexx "                                               
+                + " , j.nUnitPrce "                                                                                
+                + " , j.nPromoDsc "                                                                       
+                + " , j.nFleetDsc "                                                                       
+                + " , j.nSPFltDsc "                                                                       
+                + " , j.nBndleDsc "                                                                       
+                + " , j.nAddlDscx " 
                 + " FROM si_master_source a "   
                   /*VDR INFORMATION*/
                 + " LEFT JOIN udr_master b ON b.sTransNox = a.sReferNox"     
@@ -820,5 +896,131 @@ public class Model_VehicleSalesInvoice implements GEntity {
      */
     public String getSEName() {
         return (String) getValue("sSENamexx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setUnitPrce(BigDecimal fdbValue) {
+        return setValue("nUnitPrce", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getUnitPrce() {
+        if(getValue("nUnitPrce") == null || getValue("nUnitPrce").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nUnitPrce")));
+        }
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setPromoDsc(BigDecimal fdbValue) {
+        return setValue("nPromoDsc", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getPromoDsc() {
+        if(getValue("nPromoDsc") == null || getValue("nPromoDsc").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nPromoDsc")));
+        }
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setFleetDsc(BigDecimal fdbValue) {
+        return setValue("nFleetDsc", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getFleetDsc() {
+        if(getValue("nFleetDsc") == null || getValue("nFleetDsc").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nFleetDsc")));
+        }
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setSPFltDsc(BigDecimal fdbValue) {
+        return setValue("nSPFltDsc", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getSPFltDsc() {
+        if(getValue("nSPFltDsc") == null || getValue("nSPFltDsc").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nSPFltDsc")));
+        }
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setBndleDsc(BigDecimal fdbValue) {
+        return setValue("nBndleDsc", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getBndleDsc() {
+        if(getValue("nBndleDsc") == null || getValue("nBndleDsc").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nBndleDsc")));
+        }
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setAddlDsc(BigDecimal fdbValue) {
+        return setValue("nAddlDscx", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getAddlDsc() {
+        if(getValue("nAddlDscx") == null || getValue("nAddlDscx").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nAddlDscx")));
+        }
     }
 }

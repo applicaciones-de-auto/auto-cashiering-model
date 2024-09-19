@@ -240,7 +240,7 @@ public class Model_SalesInvoice_Master implements GEntity {
 
         //replace with the primary key column info
         setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"S"));
-        setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+//        setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
         
         poJSON = new JSONObject();
         poJSON.put("result", "success");
@@ -301,7 +301,7 @@ public class Model_SalesInvoice_Master implements GEntity {
             if (pnEditMode == EditMode.ADDNEW) {
                 //replace with the primary key column info
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"S"));
-                setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+//                setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
                 setModifiedBy(poGRider.getUserID());
                 setModifiedDte(poGRider.getServerDate());
                 
