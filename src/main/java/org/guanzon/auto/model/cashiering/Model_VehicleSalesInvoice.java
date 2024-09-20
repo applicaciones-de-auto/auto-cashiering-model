@@ -34,7 +34,7 @@ public class Model_VehicleSalesInvoice implements GEntity {
     JSONObject poJSON;              //json container
     int pnEditMode;                 //edit mode
     String psExclude = "sUDRNoxxx»cCustType»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclFDsc»sVhclDesc»sColorDsc»sCoCltNmx»sSENamexx"
-                     + "»nUnitPrce»nPromoDsc»nFleetDsc»nSPFltDsc»nBndleDsc»nAddlDscx";
+                     + "»nUnitPrce»nPromoDsc»nFleetDsc»nSPFltDsc»nBndleDsc»nAddlDscx»sBankname»cPayModex";
     private String psTargetBranchCd = "";
 
     /**
@@ -257,12 +257,12 @@ public class Model_VehicleSalesInvoice implements GEntity {
     public JSONObject openRecord(String fsValue, int fnValue) {
         poJSON = new JSONObject();
 
-        String lsSQL = makeSelectSQL();
+        String lsSQL = getSQL();
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsValue) 
-                                                + " AND nEntryNox = " + SQLUtil.toSQL(fnValue));
-
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) 
+                                                + " AND a.nEntryNox = " + SQLUtil.toSQL(fnValue));
+        System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
         try {
@@ -506,7 +506,9 @@ public class Model_VehicleSalesInvoice implements GEntity {
                 + " , j.nFleetDsc "                                                                       
                 + " , j.nSPFltDsc "                                                                       
                 + " , j.nBndleDsc "                                                                       
-                + " , j.nAddlDscx " 
+                + " , j.nAddlDscx "                                                                       
+                + " , j.cPayModex "                                                                    
+                + " , n.sBankname " 
                 + " FROM si_master_source a "   
                   /*VDR INFORMATION*/
                 + " LEFT JOIN udr_master b ON b.sTransNox = a.sReferNox"     
@@ -519,10 +521,13 @@ public class Model_VehicleSalesInvoice implements GEntity {
                 + " LEFT JOIN vehicle_type h ON h.sTypeIDxx = e.sTypeIDxx  "
                 + " LEFT JOIN vehicle_color i ON i.sColorIDx = e.sColorIDx " 
                  /*CO CLIENT*/                                                  
-                + " LEFT JOIN vsp_master j ON j.sTransNox = b.sSourceNo "                                        
+                + " LEFT JOIN vsp_master j ON j.sTransNox = b.sSourceNo "                                         
                 + " LEFT JOIN client_master k ON k.sClientID = j.sCoCltIDx "  
                 + " LEFT JOIN customer_inquiry l ON l.sTransNox = j.sInqryIDx " 
-                + " LEFT JOIN ggc_isysdbf.client_master m ON m.sClientID = l.sEmployID    " ;  
+                + " LEFT JOIN ggc_isysdbf.client_master m ON m.sClientID = l.sEmployID    "   
+                + " LEFT JOIN vsp_finance n ON n.sTransNox = j.sTransNox " ;   
+//                + " LEFT JOIN banks_branches o ON o.sBrBankID = n.sBankIDxx "  
+//                + " LEFT JOIN banks p ON p.sBankIDxx = o.sBankIDxx ";  
     }
     
     /**
@@ -1022,5 +1027,39 @@ public class Model_VehicleSalesInvoice implements GEntity {
         } else {
             return new BigDecimal(String.valueOf(getValue("nAddlDscx")));
         }
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setPayMode(String fsValue) {
+        return setValue("cPayModex", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getPayMode() {
+        return (String) getValue("cPayModex");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setBankname(String fsValue) {
+        return setValue("sBankname", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBankname() {
+        return (String) getValue("sBankname");
     }
 }
