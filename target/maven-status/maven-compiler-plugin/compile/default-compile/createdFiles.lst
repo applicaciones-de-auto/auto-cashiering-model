@@ -1,2 +1,2 @@
-org\guanzon\auto\model\cashiering\Model_VehicleSalesInvoice_Source.class
-org\guanzon\auto\model\cashiering\Model_VehicleSalesInvoice_Master.class
+org\guanzon\auto\model\cashiering\Model_SalesInvoice_Master.class
+org\guanzon\auto\model\cashiering\Model_VehicleSalesInvoice.class
