@@ -262,7 +262,6 @@ public class Model_SalesInvoice_Master implements GEntity {
         //replace the condition based on the primary key column of the record
         lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue)
                                                 );
-
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
         try {
@@ -283,7 +282,7 @@ public class Model_SalesInvoice_Master implements GEntity {
             poJSON.put("result", "error");
             poJSON.put("message", e.getMessage());
         }
-
+        
         return poJSON;
     }
 
