@@ -61,11 +61,11 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
             poEntity.moveToInsertRow();
 
             MiscUtil.initRowSet(poEntity);        
-            poEntity.updateObject("dTransact", poGRider.getServerDate()); 
+//            poEntity.updateObject("dTransact", poGRider.getServerDate()); 
 //            poEntity.updateString("", TransactionStatus.STATE_OPEN); 
 //            poEntity.updateObject("", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
 //            poEntity.updateDouble("", 0.00);  
-            poEntity.updateInt("nEntryNox", 0);
+//            poEntity.updateInt("nEntryNox", 0);
             poEntity.updateBigDecimal("nGrossAmt", new BigDecimal("0.00"));                     
             poEntity.updateBigDecimal("nDiscAmtx", new BigDecimal("0.00"));                     
             poEntity.updateBigDecimal("nDeductnx", new BigDecimal("0.00"));                     
