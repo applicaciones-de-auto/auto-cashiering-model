@@ -241,6 +241,7 @@ public class Model_SalesInvoice_Master implements GEntity {
         //replace with the primary key column info
         setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"S"));
 //        setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+        setPrinted("0");
         
         poJSON = new JSONObject();
         poJSON.put("result", "success");
