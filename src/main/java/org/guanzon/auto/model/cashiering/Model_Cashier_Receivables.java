@@ -435,9 +435,9 @@ final String XML = "Model_Cashier_Receivables.xml";
                 + " , a.nAmtPaidx "    
                 + " , CASE "
                 + "     WHEN a.cPayerCde = 'a' THEN '' " //ASSOCIATE
-                + "     WHEN a.cPayerCde = 'b' THEN '' " //BANK
-                + "     WHEN a.cPayerCde = 'c' THEN '' " //CUSTOMER
-                + "     WHEN a.cPayerCde = 'i' THEN '' " //INSURANCE
+                + "     WHEN a.cPayerCde = 'b' THEN CONCAT(k.sBankName, ' ', h.sBrBankNm) " //BANK
+                + "     WHEN a.cPayerCde = 'c' THEN b.sCompnyNm " //CUSTOMER
+                + "     WHEN a.cPayerCde = 'i' THEN CONCAT(o.sInsurNme, ' ', l.sBrInsNme) " //INSURANCE
                 + "     WHEN a.cPayerCde = 's' THEN '' " //SUPPLIER                                  
                 + " 	ELSE ''  "                                                          
                 + "    END AS sPayerNme " 
@@ -700,7 +700,7 @@ final String XML = "Model_Cashier_Receivables.xml";
     /**
      * @return The Value of this record.
      */
-    public BigDecimal setDeductn() {
+    public BigDecimal getDeductn() {
         if(getValue("nDeductnx") == null || getValue("nDeductnx").equals("")){
             return new BigDecimal("0.00");
         } else {
@@ -771,109 +771,22 @@ final String XML = "Model_Cashier_Receivables.xml";
         }
     }
     
-//    /**
-//     * Description: Sets the Value of this record.
-//     *
-//     * @param fsValue
-//     * @return result as success/failed
-//     */
-//    public JSONObject setTranStat(String fsValue) {
-//        return setValue("cTranStat", fsValue);
-//    }
-//
-//    /**
-//     * @return The Value of this record.
-//     */
-//    public String getTranStat() {
-//        return (String) getValue("cTranStat");
-//    }
-    
-//    /**
-//     * Sets record as active.
-//     *
-//     * @param fbValue
-//     * @return result as success/failed
-//     */
-//    public JSONObject setActive(boolean fbValue) {
-//        return setValue("cTranStat", fbValue ? "1" : "0");
-//    }
-//
-//    /**
-//     * @return If record is active.
-//     */
-//    public boolean isActive() {
-//        return ((String) getValue("cTranStat")).equals("1");
-//    }
-    
-//    /**
-//     * Description: Sets the Value of this record.
-//     *
-//     * @param fsValue
-//     * @return result as success/failed
-//     */
-//    public JSONObject setModifiedBy(String fsValue) {
-//        return setValue("sModified", fsValue);
-//    }
-//
-//    /**
-//     * @return The Value of this record.
-//     */
-//    public String getModifiedBy() {
-//        return (String) getValue("sModified");
-//    }
-//    
-//    /**
-//     * Sets the date and time the record was modified.
-//     *
-//     * @param fdValue
-//     * @return result as success/failed
-//     */
-//    public JSONObject setModifiedDte(Date fdValue) {
-//        return setValue("dModified", fdValue);
-//    }
-//
-//    /**
-//     * @return The date and time the record was modified.
-//     */
-//    public Date getModifiedDte() {
-//        return (Date) getValue("dModified");
-//    }
-    
-//    /**
-//     * Description: Sets the Value of this record.
-//     *
-//     * @param fsValue
-//     * @return result as success/failed
-//     */
-//    public JSONObject setTranStatus(String fsValue) {
-//        return setValue("sTranStat", fsValue);
-//    }
-//
-//    /**
-//     * @return The Value of this record.
-//     */
-//    public String getTranStatus() {
-//        return (String) getValue("sTranStat");
-//    }
-    
-    /*POLICY APPLICATION*/
-//    
-//    /**
-//     * Description: Sets the ID of this record.
-//     *
-//     * @param fsValue
-//     * @return result as success/failed
-//     */
-//    public JSONObject setApplicNo(String fsValue) {
-//        return setValue("sApplicNo", fsValue);
-//    }
-//
-//    /**
-//     * @return The ID of this record.
-//     */
-//    public String getApplicNo() {
-//        return (String) getValue("sApplicNo");
-//    }
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setPayerNme(String fsValue) {
+        return setValue("sPayerNme", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getPayerNme() {
+        return (String) getValue("sPayerNme");
+    }
     
     /**
      * Description: Sets the Value of this record.
