@@ -2,3 +2,5 @@ org\guanzon\auto\model\cashiering\Model_SalesInvoice_Master.class
 org\guanzon\auto\model\cashiering\Model_Cashier_Receivables.class
 org\guanzon\auto\model\cashiering\Model_VehicleSalesInvoice.class
 org\guanzon\auto\model\cashiering\Model_Cashier_Receivables_Detail.class
+org\guanzon\auto\model\cashiering\Model_StatementOfAccount.class
+org\guanzon\auto\model\cashiering\Model_StatementOfAccount_Detail.class

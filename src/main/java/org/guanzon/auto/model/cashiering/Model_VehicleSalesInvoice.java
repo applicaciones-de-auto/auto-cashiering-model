@@ -235,6 +235,8 @@ public class Model_VehicleSalesInvoice implements GEntity {
     @Override
     public JSONObject newRecord() {
         pnEditMode = EditMode.ADDNEW;
+        
+        setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
 
         poJSON = new JSONObject();
         poJSON.put("result", "success");
@@ -242,26 +244,13 @@ public class Model_VehicleSalesInvoice implements GEntity {
     }
     
     @Override
-    public JSONObject openRecord(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-
-    /**
-     * Opens a record.
-     *
-     * @param fsValue - filter values
-     * @param fnValue - filter values
-     * @return result as success/failed
-     */
-    public JSONObject openRecord(String fsValue, int fnValue) {
+    public JSONObject openRecord(String fsValue) {
         poJSON = new JSONObject();
 
         String lsSQL = getSQL();
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) 
-                                                + " AND a.nEntryNox = " + SQLUtil.toSQL(fnValue));
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue));
         System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -286,6 +275,45 @@ public class Model_VehicleSalesInvoice implements GEntity {
 
         return poJSON;
     }
+//    /**
+//     * Opens a record.
+//     *
+//     * @param fsValue - filter values
+//     * @param fnValue - filter values
+//     * @return result as success/failed
+//     */
+//    public JSONObject openRecord(String fsValue, int fnValue) {
+//        poJSON = new JSONObject();
+//
+//        String lsSQL = getSQL();
+//
+//        //replace the condition based on the primary key column of the record
+//        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) 
+//                                                + " AND a.nEntryNox = " + SQLUtil.toSQL(fnValue));
+//        System.out.println(lsSQL);
+//        ResultSet loRS = poGRider.executeQuery(lsSQL);
+//
+//        try {
+//            if (loRS.next()) {
+//                for (int lnCtr = 1; lnCtr <= loRS.getMetaData().getColumnCount(); lnCtr++) {
+//                    setValue(lnCtr, loRS.getObject(lnCtr));
+//                }
+//
+//                pnEditMode = EditMode.UPDATE;
+//
+//                poJSON.put("result", "success");
+//                poJSON.put("message", "Record loaded successfully.");
+//            } else {
+//                poJSON.put("result", "error");
+//                poJSON.put("message", "No record to load.");
+//            }
+//        } catch (SQLException e) {
+//            poJSON.put("result", "error");
+//            poJSON.put("message", e.getMessage());
+//        }
+//
+//        return poJSON;
+//    }
     /**
      * Save the entity.
      *
@@ -299,7 +327,7 @@ public class Model_VehicleSalesInvoice implements GEntity {
             String lsSQL;
             if (pnEditMode == EditMode.ADDNEW) {
                 //replace with the primary key column info
-                //setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+                setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
 
                 lsSQL = makeSQL();
 
@@ -319,12 +347,14 @@ public class Model_VehicleSalesInvoice implements GEntity {
                 Model_VehicleSalesInvoice loOldEntity = new Model_VehicleSalesInvoice (poGRider);
 
                 //replace with the primary key column info
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(),this.getEntryNo());
+//                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(),this.getEntryNo());
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
 
                 if ("success".equals((String) loJSON.get("result"))) {
                     //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
-                                                                                + " AND nEntryNox = " + SQLUtil.toSQL(this.getEntryNo()), psExclude);
+//                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
+//                                                                                + " AND nEntryNox = " + SQLUtil.toSQL(this.getEntryNo()), psExclude);
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()), psExclude);
 
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
@@ -511,7 +541,7 @@ public class Model_VehicleSalesInvoice implements GEntity {
                 + " , n.sBankname " 
                 + " FROM si_master_source a "   
                   /*VDR INFORMATION*/
-                + " LEFT JOIN udr_master b ON b.sTransNox = a.sReferNox"     
+                + " LEFT JOIN udr_master b ON b.sTransNox = a.sSourceNo"      //sReferNox
                  /*VEHICLE INFORMATION*/                                                          
                 + " LEFT JOIN vehicle_serial c ON c.sSerialID = b.sSerialID "                     
                 + " LEFT JOIN vehicle_serial_registration d ON d.sSerialID = b.sSerialID "        
