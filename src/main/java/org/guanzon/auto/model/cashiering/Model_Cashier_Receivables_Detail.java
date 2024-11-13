@@ -254,7 +254,7 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this, psExclude); //exclude the columns called thru left join
         //replace the condition based on the primary key column of the record
         lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue)
-                                                +  " AND a.sTranType = " + SQLUtil.toSQL(fsValue)
+                                                +  " AND a.sTranType = " + SQLUtil.toSQL(fsValue2)
                                                 //+ " GROUP BY a.sTransNox "
                                                 );
 
@@ -572,7 +572,7 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
     /**
      * @return The Value of this record.
      */
-    public BigDecimal setDeductn() {
+    public BigDecimal getDeductn() {
         if(getValue("nDeductnx") == null || getValue("nDeductnx").equals("")){
             return new BigDecimal("0.00");
         } else {
