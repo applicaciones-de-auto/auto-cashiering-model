@@ -26,8 +26,9 @@ import org.json.simple.JSONObject;
  *
  * @author Arsiela
  */
-public class Model_StatementOfAccount_Detail implements GEntity{
-final String XML = "Model_StatementOfAccount_Detail.xml";
+
+public class Model_SalesInvoice_Source implements GEntity{
+final String XML = "Model_SalesInvoice_Source.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
     private String psExclude = ""; //»
@@ -42,7 +43,7 @@ final String XML = "Model_StatementOfAccount_Detail.xml";
      *
      * @param foValue - GhostRider Application Driver
      */
-    public Model_StatementOfAccount_Detail(GRider foValue) {
+    public Model_SalesInvoice_Source(GRider foValue) {
         if (foValue == null) {
             System.err.println("Application Driver is not set.");
             System.exit(1);
@@ -66,11 +67,10 @@ final String XML = "Model_StatementOfAccount_Detail.xml";
 //            poEntity.updateObject("", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
 //            poEntity.updateDouble("", 0.00);  
 //            poEntity.updateInt("nEntryNox", 0);
-            poEntity.updateBigDecimal("nGrossAmt", new BigDecimal("0.00"));                     
-            poEntity.updateBigDecimal("nDiscAmtx", new BigDecimal("0.00"));                     
-            poEntity.updateBigDecimal("nDeductnx", new BigDecimal("0.00"));                     
-            poEntity.updateBigDecimal("nTotalAmt", new BigDecimal("0.00"));                   
-            poEntity.updateBigDecimal("nAmtPaidx", new BigDecimal("0.00")); 
+            poEntity.updateBigDecimal("nTranAmtx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nDiscount", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nAdvusedx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nNetAmtxx", new BigDecimal("0.00")); 
 
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -135,7 +135,7 @@ final String XML = "Model_StatementOfAccount_Detail.xml";
 
     @Override
     public String getTable() {
-        return "soa_detail";
+        return "si_master_source";
     }
     
     /**
@@ -231,6 +231,10 @@ final String XML = "Model_StatementOfAccount_Detail.xml";
     public JSONObject newRecord() {
         pnEditMode = EditMode.ADDNEW;
         
+        //replace with the primary key column info
+        setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+
+        
         poJSON = new JSONObject();
         poJSON.put("result", "success");
         return poJSON;
@@ -238,24 +242,11 @@ final String XML = "Model_StatementOfAccount_Detail.xml";
     
     @Override
     public JSONObject openRecord(String fsValue) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    /**
-     * Opens a record.
-     *
-     * @param fsValue - filter values
-     * @param fsValue2 - filter values
-     * @return result as success/failed
-     */
-    public JSONObject openRecord(String fsValue, String fsValue2) {
         poJSON = new JSONObject();
 
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this, psExclude); //exclude the columns called thru left join
         //replace the condition based on the primary key column of the record
         lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue)
-                                                +  " AND a.nEntryNox = " + SQLUtil.toSQL(fsValue)
-                                                //+ " GROUP BY a.sTransNox "
                                                 );
 
         System.out.println(lsSQL);
@@ -295,8 +286,11 @@ final String XML = "Model_StatementOfAccount_Detail.xml";
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
             String lsSQL; 
             if (pnEditMode == EditMode.ADDNEW) {
-                setModifiedBy(poGRider.getUserID());
-                setModifiedDte(poGRider.getServerDate());
+                //replace with the primary key column info
+                setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+
+//                setModifiedBy(poGRider.getUserID());
+//                setModifiedDte(poGRider.getServerDate());
                 
                 //replace with the primary key column info
                 lsSQL = MiscUtil.makeSQL(this, psExclude);
@@ -308,21 +302,21 @@ final String XML = "Model_StatementOfAccount_Detail.xml";
                         poJSON.put("message", "Record saved successfully.");
                     } else {
                         poJSON.put("result", "error");
-                        poJSON.put("message", "Error while saving SOA detail.\n\n" + poGRider.getErrMsg());
+                        poJSON.put("message", "Error while saving SI detail.\n\n" + poGRider.getErrMsg());
                     }
                 } else {
                     poJSON.put("result", "error");
-                    poJSON.put("message", "Error while saving SOA detail.\n\n" + "No record to save.");
+                    poJSON.put("message", "Error while saving SI detail.\n\n" + "No record to save.");
                 }
             } else {
-                Model_StatementOfAccount_Detail loOldEntity = new Model_StatementOfAccount_Detail(poGRider);
+                Model_SalesInvoice_Source loOldEntity = new Model_SalesInvoice_Source(poGRider);
                 
                 //replace with the primary key column info
                 JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
 
                 if ("success".equals((String) loJSON.get("result"))) {
-                    setModifiedBy(poGRider.getUserID());
-                    setModifiedDte(poGRider.getServerDate());
+//                    setModifiedBy(poGRider.getUserID());
+//                    setModifiedDte(poGRider.getServerDate());
                     
                     //replace the condition based on the primary key column of the record
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()), psExclude);
@@ -333,7 +327,7 @@ final String XML = "Model_StatementOfAccount_Detail.xml";
                             poJSON.put("message", "Record saved successfully.");
                         } else {
                             poJSON.put("result", "error");
-                            poJSON.put("message",  "Error while saving cashier receivables detail.\n\n" + poGRider.getErrMsg());
+                            poJSON.put("message",  "Error while saving SI detail.\n\n" + poGRider.getErrMsg());
                         }
                     } else {
                         poJSON.put("result", "success");
@@ -435,20 +429,18 @@ final String XML = "Model_StatementOfAccount_Detail.xml";
     }
     
     public String getSQL(){
-        return    " SELECT "              
-                + "    a.sTransNox "      
-                + "  , a.nEntryNox "      
-                + "  , a.dReferDte "      
-                + "  , a.sReferNox "      
-                + "  , a.sAcctCode "      
-                + "  , a.sDescript "      
-                + "  , a.sSourceCD "      
-                + "  , a.sSourceNo "      
-                + "  , a.sTranType "      
-                + "  , a.nAmountxx "      
-                + "  , a.sModified "      
-                + "  , a.dModified "      
-                + " FROM soa_detail a " ;             
+        return    " SELECT "                 
+                + "    a.sTransNox "         
+                + "  , a.sReferNox "         
+                + "  , a.sSourceCD "         
+                + "  , a.sSourceNo "         
+                + "  , a.sTranType "         
+                + "  , a.nTranAmtx "         
+                + "  , a.nDiscount "         
+                + "  , a.nAdvusedx "         
+                + "  , a.nNetAmtxx "         
+                + "  , a.nEntryNox "         
+                + " FROM si_master_source a ";             
     }
     
     private static String xsDateShort(Date fdValue) {
@@ -509,30 +501,6 @@ final String XML = "Model_StatementOfAccount_Detail.xml";
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fdValue
-     * @return result as success/failed
-     */
-    public JSONObject setApproveDte(Date fdValue) {
-        return setValue("dReferDte", fdValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public Date getApproveDte() {
-        Date date = null;
-        if(getValue("dReferDte") == null || getValue("dReferDte").equals("")){
-            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
-        } else {
-            date = SQLUtil.toDate(xsDateShort((Date) getValue("dReferDte")), SQLUtil.FORMAT_SHORT_DATE);
-        }
-            
-        return date;
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
      * @param fsValue
      * @return result as success/failed
      */
@@ -545,40 +513,6 @@ final String XML = "Model_StatementOfAccount_Detail.xml";
      */
     public String getReferNo() {
         return (String) getValue("sReferNox");
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setAcctCode(String fsValue) {
-        return setValue("sAcctCode", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getAcctCode() {
-        return (String) getValue("sAcctCode");
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setDescript(String fsValue) {
-        return setValue("sDescript", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getDescript() {
-        return (String) getValue("sDescript");
     }
     
     /**
@@ -638,53 +572,116 @@ final String XML = "Model_StatementOfAccount_Detail.xml";
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setAmount(BigDecimal fdbValue) {
-        return setValue("nAmountxx", fdbValue);
+    public JSONObject setTranAmt(BigDecimal fdbValue) {
+        return setValue("nTranAmtx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public BigDecimal getAmount() {
-        if(getValue("nAmountxx") == null || getValue("nAmountxx").equals("")){
+    public BigDecimal getTranAmt() {
+        if(getValue("nTranAmtx") == null || getValue("nTranAmtx").equals("")){
             return new BigDecimal("0.00");
         } else {
-            return new BigDecimal(String.valueOf(getValue("nAmountxx")));
+            return new BigDecimal(String.valueOf(getValue("nTranAmtx")));
         }
     }
     
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fsValue
+     * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setModifiedBy(String fsValue) {
-        return setValue("sModified", fsValue);
+    public JSONObject setDiscount(BigDecimal fdbValue) {
+        return setValue("nDiscount", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public String getModifiedBy() {
-        return (String) getValue("sModified");
+    public BigDecimal getDiscount() {
+        if(getValue("nDiscount") == null || getValue("nDiscount").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nDiscount")));
+        }
     }
     
     /**
-     * Sets the date and time the record was modified.
+     * Description: Sets the Value of this record.
      *
-     * @param fdValue
+     * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setModifiedDte(Date fdValue) {
-        return setValue("dModified", fdValue);
+    public JSONObject setAdvused(BigDecimal fdbValue) {
+        return setValue("nAdvusedx", fdbValue);
     }
 
     /**
-     * @return The date and time the record was modified.
+     * @return The Value of this record.
      */
-    public Date getModifiedDte() {
-        return (Date) getValue("dModified");
+    public BigDecimal getAdvused() {
+        if(getValue("nAdvusedx") == null || getValue("nAdvusedx").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nAdvusedx")));
+        }
     }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setNetAmt(BigDecimal fdbValue) {
+        return setValue("nNetAmtxx", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getNetAmt() {
+        if(getValue("nNetAmtxx") == null || getValue("nNetAmtxx").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nNetAmtxx")));
+        }
+    }
+//    
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fsValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setModifiedBy(String fsValue) {
+//        return setValue("sModified", fsValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public String getModifiedBy() {
+//        return (String) getValue("sModified");
+//    }
+//    
+//    /**
+//     * Sets the date and time the record was modified.
+//     *
+//     * @param fdValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setModifiedDte(Date fdValue) {
+//        return setValue("dModified", fdValue);
+//    }
+//
+//    /**
+//     * @return The date and time the record was modified.
+//     */
+//    public Date getModifiedDte() {
+//        return (Date) getValue("dModified");
+//    }
     
 }
