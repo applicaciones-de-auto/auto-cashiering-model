@@ -66,12 +66,9 @@ final String XML = "Model_StatementOfAccount_Detail.xml";
 //            poEntity.updateObject("", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
 //            poEntity.updateDouble("", 0.00);  
 //            poEntity.updateInt("nEntryNox", 0);
-            poEntity.updateBigDecimal("nGrossAmt", new BigDecimal("0.00"));                     
-            poEntity.updateBigDecimal("nDiscAmtx", new BigDecimal("0.00"));                     
-            poEntity.updateBigDecimal("nDeductnx", new BigDecimal("0.00"));                     
-            poEntity.updateBigDecimal("nTotalAmt", new BigDecimal("0.00"));                   
-            poEntity.updateBigDecimal("nAmtPaidx", new BigDecimal("0.00")); 
 
+            poEntity.updateObject("dReferDte", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE)); 
+            poEntity.updateBigDecimal("nAmountxx", new BigDecimal("0.00"));  
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
             poEntity.absolute(1);

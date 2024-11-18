@@ -315,7 +315,7 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
                 Model_Cashier_Receivables_Detail loOldEntity = new Model_Cashier_Receivables_Detail(poGRider);
                 
                 //replace with the primary key column info
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(), this.getTranType());
 
                 if ("success".equals((String) loJSON.get("result"))) {
 //                    setModifiedBy(poGRider.getUserID());

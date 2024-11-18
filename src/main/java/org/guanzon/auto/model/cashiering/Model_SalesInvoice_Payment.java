@@ -67,10 +67,11 @@ final String XML = "Model_SalesInvoice_Payment.xml";
 //            poEntity.updateObject("", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
 //            poEntity.updateDouble("", 0.00);  
 //            poEntity.updateInt("nEntryNox", 0);
-            poEntity.updateBigDecimal("nTranAmtx", new BigDecimal("0.00"));
-            poEntity.updateBigDecimal("nDiscount", new BigDecimal("0.00"));
-            poEntity.updateBigDecimal("nAdvusedx", new BigDecimal("0.00"));
-            poEntity.updateBigDecimal("nNetAmtxx", new BigDecimal("0.00")); 
+
+            poEntity.updateBigDecimal("nPayAmtxx", new BigDecimal("0.00"));
+//            poEntity.updateBigDecimal("nDiscount", new BigDecimal("0.00"));
+//            poEntity.updateBigDecimal("nAdvusedx", new BigDecimal("0.00"));
+//            poEntity.updateBigDecimal("nNetAmtxx", new BigDecimal("0.00")); 
 
             poEntity.insertRow();
             poEntity.moveToCurrentRow();

@@ -31,7 +31,8 @@ public class Model_Cashier_Receivables implements GEntity{
 final String XML = "Model_Cashier_Receivables.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
-    private String psExclude = "sPayerNme»sOwnrNmxx»cClientTp»sAddressx»sBankName»sBankAddr»sInsNamex»sInsAddrx"; //»
+    private String psExclude = "sPayerNme»sPayerIDx»sPayerAdd»sOwnrNmxx»cClientTp»sAddressx»sBankName»sBankAddr»sInsNamex»sInsAddrx"
+                            + "»sFormNoxx»sVSPNoxxx»sVSANoxxx»sInsAppNo»sCSNoxxxx»sPlateNox»sDescript"; //»
     
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -440,7 +441,28 @@ final String XML = "Model_Cashier_Receivables.xml";
                 + "     WHEN a.cPayerCde = 'i' THEN CONCAT(o.sInsurNme, ' ', l.sBrInsNme) " //INSURANCE
                 + "     WHEN a.cPayerCde = 's' THEN '' " //SUPPLIER                                  
                 + " 	ELSE ''  "                                                          
-                + "    END AS sPayerNme " 
+                + "    END AS sPayerNme "   
+                + " , CASE "
+                + "     WHEN a.cPayerCde = 'a' THEN '' " //ASSOCIATE
+                + "     WHEN a.cPayerCde = 'b' THEN a.sBrBankCd " //BANK
+                + "     WHEN a.cPayerCde = 'c' THEN a.sClientID " //CUSTOMER
+                + "     WHEN a.cPayerCde = 'i' THEN a.sBrInsCde " //INSURANCE
+                + "     WHEN a.cPayerCde = 's' THEN '' " //SUPPLIER                                  
+                + " 	ELSE ''  "                                                          
+                + "    END AS sPayerIDx " 
+                + " , CASE "
+                + "     WHEN a.cPayerCde = 'a' THEN '' " //ASSOCIATE
+                + "     WHEN a.cPayerCde = 'b' THEN CONCAT(IFNULL(h.sAddressx, ''), i.sTownName, j.sProvName) " //BANK
+                + "     WHEN a.cPayerCde = 'c' THEN " //CUSTOMER
+                + "     TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), "                    
+                + "   IFNULL(CONCAT(d.sAddressx,' ') , ''), "                                        
+                + "   IFNULL(CONCAT(e.sBrgyName,' '), ''),  "                                        
+                + "   IFNULL(CONCAT(f.sTownName, ', '),''), "                                        
+                + "   IFNULL(CONCAT(g.sProvName),'') ), '')) "
+                + "     WHEN a.cPayerCde = 'i' THEN CONCAT(IFNULL(l.sAddressx, ''), m.sTownName, n.sProvName) " //INSURANCE
+                + "     WHEN a.cPayerCde = 's' THEN '' " //SUPPLIER                                  
+                + " 	ELSE ''  "                                                          
+                + "    END AS sPayerAdd "
                 + " , b.sCompnyNm AS sOwnrNmxx "                                                     
                 + " , b.cClientTp "                                                                  
                 + " , TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), "                    
@@ -451,7 +473,14 @@ final String XML = "Model_Cashier_Receivables.xml";
                 + " , CONCAT(k.sBankName, ' ', h.sBrBankNm) AS sBankName  "                          
                 + " , CONCAT(IFNULL(h.sAddressx, ''), i.sTownName, j.sProvName) AS sBankAddr "       
                 + " , CONCAT(o.sInsurNme, ' ', l.sBrInsNme) AS sInsNamex "                           
-                + " , CONCAT(IFNULL(l.sAddressx, ''), m.sTownName, n.sProvName) AS sInsAddrx "       
+                + " , CONCAT(IFNULL(l.sAddressx, ''), m.sTownName, n.sProvName) AS sInsAddrx "  
+                + " , IFNULL(p.sVSPNOxxx, IFNULL(q.sReferNox, IFNULL(r.sReferNox, ''))) AS sFormNoxx "  
+                + " , p.sVSPNOxxx AS sVSPNoxxx "                                                        
+                + " , q.sReferNox AS sVSANoxxx "                                                        
+                + " , r.sReferNox AS sInsAppNo "                                                        
+                + " , aa.sCSNoxxxx "                                                                    
+                + " , bb.sPlateNox "                                                                    
+                + " , cc.sDescript "                                                                    
                 + " FROM cashier_receivables a  "                                                    
                 + " LEFT JOIN client_master b ON b.sClientID = a.sClientID "                         
                 + " LEFT JOIN client_address c ON c.sClientID = a.sClientID AND c.cPrimaryx = 1 "    
@@ -466,8 +495,17 @@ final String XML = "Model_Cashier_Receivables.xml";
                 + " LEFT JOIN insurance_company_branches l ON l.sBrInsIDx = a.sBrInsCde "            
                 + " LEFT JOIN towncity m ON m.sTownIDxx = l.sTownIDxx "                              
                 + " LEFT JOIN province n ON n.sProvIDxx = m.sProvIDxx "                              
-                + " LEFT JOIN insurance_company o ON o.sInsurIDx = l.sInsurIDx "  ;                                                
-                           
+                + " LEFT JOIN insurance_company o ON o.sInsurIDx = l.sInsurIDx "
+                /*TRANSACTION*/                                                                               
+                + " LEFT JOIN vsp_master p ON p.sTransNox = a.sReferNox  "                                    
+                + " LEFT JOIN customer_inquiry_reservation q ON q.sTransNox = a.sReferNox "                   
+                + " LEFT JOIN insurance_policy_application r ON r.sTransNox = a.sReferNox "                   
+                + " LEFT JOIN insurance_policy_proposal s ON s.sTransNox = r.sReferNox    "                   
+                /*VEHICLE INFORMATION*/                                                                       
+                + " LEFT JOIN vehicle_serial aa ON aa.sSerialID = p.sSerialID OR aa.sSerialID = s.sSerialID " 
+                + " LEFT JOIN vehicle_serial_registration bb ON bb.sSerialID = aa.sSerialID "                 
+                + " LEFT JOIN vehicle_master cc ON cc.sVhclIDxx = aa.sVhclIDxx "  ;                                                
+
     }
     
     private static String xsDateShort(Date fdValue) {
@@ -794,6 +832,40 @@ final String XML = "Model_Cashier_Receivables.xml";
      * @param fsValue
      * @return result as success/failed
      */
+    public JSONObject setPayerID(String fsValue) {
+        return setValue("sPayerIDx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getPayerID() {
+        return (String) getValue("sPayerIDx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setPayerAdd(String fsValue) {
+        return setValue("sPayerAdd", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getPayerAdd() {
+        return (String) getValue("sPayerAdd");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
     public JSONObject setOwnrNm(String fsValue) {
         return setValue("sOwnrNmxx", fsValue);
     }
@@ -871,6 +943,125 @@ final String XML = "Model_Cashier_Receivables.xml";
      */
     public String getBankAddr() {
         return (String) getValue("sBankAddr");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setFormNo(String fsValue) {
+        return setValue("sFormNoxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getFormNo() {
+        return (String) getValue("sFormNoxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setVSPNo(String fsValue) {
+        return setValue("sVSPNoxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getVSPNo() {
+        return (String) getValue("sVSPNoxxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setVSANo(String fsValue) {
+        return setValue("sVSANoxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getVSANo() {
+        return (String) getValue("sVSANoxxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setInsAppNo(String fsValue) {
+        return setValue("sInsAppNo", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getInsAppNo() {
+        return (String) getValue("sInsAppNo");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setCSNo(String fsValue) {
+        return setValue("sCSNoxxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCSNo() {
+        return (String) getValue("sCSNoxxxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setPlateNo(String fsValue) {
+        return setValue("sPlateNox", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getPlateNo() {
+        return (String) getValue("sPlateNox");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setVhclDesc(String fsValue) {
+        return setValue("sDescript", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getVhclDesc() {
+        return (String) getValue("sDescript");
     }
    
     /**

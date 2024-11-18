@@ -59,16 +59,14 @@ final String XML = "Model_StatementOfAccount.xml";
             poEntity = MiscUtil.xml2ResultSet(System.getProperty("sys.default.path.metadata") + XML, getTable());
 
             poEntity.last();
-            poEntity.moveToInsertRow();
+            poEntity.moveToInsertRow(); 
 
             MiscUtil.initRowSet(poEntity);        
-            poEntity.updateObject("dTransact", poGRider.getServerDate());                      
-            poEntity.updateBigDecimal("nGrossAmt", new BigDecimal("0.00"));                     
-            poEntity.updateBigDecimal("nDiscAmtx", new BigDecimal("0.00"));                     
-            poEntity.updateBigDecimal("nDeductnx", new BigDecimal("0.00"));                     
-            poEntity.updateBigDecimal("nTotalAmt", new BigDecimal("0.00"));                     
-            poEntity.updateBigDecimal("nChckPayx", new BigDecimal("0.00"));                  
-            poEntity.updateBigDecimal("nAmtPaidx", new BigDecimal("0.00")); 
+            poEntity.updateObject("dTransact", poGRider.getServerDate());   
+            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));      
+            poEntity.updateObject("dPostedxx", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));                    
+            poEntity.updateBigDecimal("nTranTotl", new BigDecimal("0.00"));                     
+            poEntity.updateBigDecimal("nAmtPaidx", new BigDecimal("0.00"));     
 
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
