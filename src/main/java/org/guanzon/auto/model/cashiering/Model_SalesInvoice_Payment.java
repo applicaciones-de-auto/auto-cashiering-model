@@ -19,6 +19,7 @@ import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
+import org.guanzon.appdriver.constant.TransactionStatus;
 import org.guanzon.appdriver.iface.GEntity;
 import org.json.simple.JSONObject;
 
@@ -31,7 +32,7 @@ public class Model_SalesInvoice_Payment implements GEntity{
 final String XML = "Model_SalesInvoice_Payment.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
-    private String psExclude = ""; //»
+    private String psExclude = "sApprovNo»sBankName»sBankIDxx»sCardNoxx»sApprovNo»sTraceNox»sRemarksx"; //»
     
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -251,8 +252,8 @@ final String XML = "Model_SalesInvoice_Payment.xml";
 
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this, psExclude); //exclude the columns called thru left join
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsValue)
-                                                + " AND sPayModex = " + SQLUtil.toSQL(fsValue2)
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue)
+                                                + " AND a.sPayTrnCD = " + SQLUtil.toSQL(fsValue2)
                                                 );
 
         System.out.println(lsSQL);
@@ -440,8 +441,16 @@ final String XML = "Model_SalesInvoice_Payment.xml";
                 + "    a.sTransNox "         
                 + "  , a.sPayModex "         
                 + "  , a.nPayAmtxx "         
-                + "  , a.sPayTrnCD "      
-                + " FROM si_master_payment a ";             
+                + "  , a.sPayTrnCD "          
+                + "  , b.sBankIDxx "          
+                + "  , b.sCardNoxx "          
+                + "  , b.sApprovNo "          
+                + "  , b.sTraceNox "          
+                + "  , b.sRemarksx " 
+                + "  , c.sBankName "
+                + " FROM si_master_payment a "
+                + " LEFT JOIN credit_card_trans b ON b.sTransNox = a.sPayTrnCD AND b.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN banks c ON c.sBankIDxx = b.sBankIDxx ";             
     }
     
     private static String xsDateShort(Date fdValue) {
@@ -535,6 +544,108 @@ final String XML = "Model_SalesInvoice_Payment.xml";
      */
     public String getPayTrnCD() {
         return (String) getValue("sPayTrnCD");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setCCBankID(String fsValue) {
+        return setValue("sBankIDxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCCBankID() {
+        return (String) getValue("sBankIDxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setCCCardNo(String fsValue) {
+        return setValue("sCardNoxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCCCardNo() {
+        return (String) getValue("sCardNoxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setCCApprovNo(String fsValue) {
+        return setValue("sApprovNo", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCCApprovNo() {
+        return (String) getValue("sApprovNo");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setCCTraceNo(String fsValue) {
+        return setValue("sTraceNox", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCCTraceNo() {
+        return (String) getValue("sTraceNox");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setCCRemarks(String fsValue) {
+        return setValue("sRemarksx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCCRemarks() {
+        return (String) getValue("sRemarksx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setCCBankName(String fsValue) {
+        return setValue("sBankName", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCCBankName() {
+        return (String) getValue("sBankName");
     }
 //    
 //    /**

@@ -30,7 +30,7 @@ public class Model_Creditcard_Trans implements GEntity{
 final String XML = "Model_Creditcard_Trans.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
-    private String psExclude = ""; //»
+    private String psExclude = "sBankName"; //»
     
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -433,8 +433,10 @@ final String XML = "Model_Creditcard_Trans.xml";
                 + "  , a.sRemarksx "          
                 + "  , a.cTranStat "          
                 + "  , a.sModified "          
-                + "  , a.dModified "          
-                + " FROM credit_card_trans a ";             
+                + "  , a.dModified "    
+                + "  , b.sBankName "      
+                + " FROM credit_card_trans a "
+                + " LEFT JOIN banks b ON b.sBankIDxx = a.sBankIDxx ";             
     }
     
     private static String xsDateShort(Date fdValue) {
@@ -632,5 +634,21 @@ final String XML = "Model_Creditcard_Trans.xml";
         return (Date) getValue("dModified");
     }
     
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setBankName(String fsValue) {
+        return setValue("sBankName", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBankName() {
+        return (String) getValue("sBankName");
+    }
     
 }

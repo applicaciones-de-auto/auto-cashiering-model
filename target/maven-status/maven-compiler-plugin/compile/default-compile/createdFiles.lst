@@ -1,5 +1,6 @@
 org\guanzon\auto\model\cashiering\Model_SalesInvoice_Source.class
 org\guanzon\auto\model\cashiering\Model_SalesInvoice_Advances_Source.class
+org\guanzon\auto\model\cashiering\Model_Creditcard_Trans.class
 org\guanzon\auto\model\cashiering\Model_SalesInvoice_Master.class
 org\guanzon\auto\model\cashiering\Model_SalesInvoice_Payment.class
 org\guanzon\auto\model\cashiering\Model_Cashier_Receivables.class
