@@ -439,8 +439,15 @@ final String XML = "Model_SalesInvoice_Source.xml";
                 + "  , a.nDiscount "         
                 + "  , a.nAdvusedx "         
                 + "  , a.nNetAmtxx "         
-                + "  , a.nEntryNox "         
-                + " FROM si_master_source a ";             
+                + "  , a.nEntryNox "
+                + "  , IFNULL( aa.sReferNox,IFNULL(c.sVSPNOxxx, IFNULL(d.sReferNox, IFNULL(e.sReferNox,'')))) AS sFormNoxx "
+                + "  , b.sSourceCD AS sDescript "
+                + " FROM si_master_source a "                                              
+                + " LEFT JOIN udr_master aa ON aa.sTransNox = a.sSourceNo "                
+                + " LEFT JOIN cashier_receivables b ON b.sTransNox = a.sSourceNo "         
+                + " LEFT JOIN vsp_master c ON c.sTransNox = b.sReferNox "                  
+                + " LEFT JOIN customer_inquiry_reservation d ON d.sTransNox = b.sReferNox "
+                + " LEFT JOIN insurance_policy_application e ON e.sTransNox = b.sReferNox ";             
     }
     
     private static String xsDateShort(Date fdValue) {
@@ -649,6 +656,41 @@ final String XML = "Model_SalesInvoice_Source.xml";
             return new BigDecimal(String.valueOf(getValue("nNetAmtxx")));
         }
     }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setFormNo(String fsValue) {
+        return setValue("sFormNoxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getFormNo() {
+        return (String) getValue("sFormNoxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setDescript(String fsValue) {
+        return setValue("sDescript", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getDescript() {
+        return (String) getValue("sDescript");
+    }
+    
 //    
 //    /**
 //     * Description: Sets the Value of this record.

@@ -70,7 +70,8 @@ public class Model_SalesInvoice_Master implements GEntity {
             poEntity.updateBigDecimal("nNonVATSl", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nZroVATSl", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nCWTAmtxx", new BigDecimal("0.00"));
-            poEntity.updateBigDecimal("cWTRatexx", new BigDecimal("0.00"));
+//            poEntity.updateBigDecimal("cWTRatexx", new BigDecimal("0.00"));
+            poEntity.updateDouble("nWTRatexx", 0.00);
             poEntity.updateBigDecimal("nNetTotal", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nCashAmtx", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nChckAmtx", new BigDecimal("0.00"));
@@ -438,7 +439,7 @@ public class Model_SalesInvoice_Master implements GEntity {
                 + "  , a.nVatAmtxx "                                                                                               
                 + "  , a.nNonVATSl "                                                                                               
                 + "  , a.nZroVATSl "                                                                                               
-                + "  , a.cWTRatexx "                                                                                               
+                + "  , a.nWTRatexx "                                                                                               
                 + "  , a.nCWTAmtxx "                                                                                               
                 + "  , a.nAdvPaymx "                                                                                               
                 + "  , a.nNetTotal "                                                                                               
@@ -477,6 +478,7 @@ public class Model_SalesInvoice_Master implements GEntity {
                 + " WHEN (l.sBrInsIDx != NULL || TRIM(l.sBrInsIDx) != '' )THEN CONCAT(IFNULL(l.sAddressx, ''), m.sTownName, n.sProvName) "                   
                 + " ELSE TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), IFNULL(CONCAT(d.sAddressx,' ') , ''), "                                   
                 + " IFNULL(CONCAT(e.sBrgyName,' '), ''),   IFNULL(CONCAT(f.sTownName, ', '),''), IFNULL(CONCAT(g.sProvName),'') )	, ''))   END AS sAddressx "
+                
                 + " FROM si_master a  "                                                                                            
                  /*CUSTOMER*/                                                                                                      
                 + " LEFT JOIN client_master b ON b.sClientID = a.sClientID  "                                                      
@@ -732,21 +734,23 @@ public class Model_SalesInvoice_Master implements GEntity {
         }
     }
     
+    
+    
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fsValue
+     * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setWTRate(String fsValue) {
-        return setValue("cWTRatexx", fsValue);
+    public JSONObject setWTRate(Double fdbValue) {
+        return setValue("nWTRatexx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public String getWTRate() {
-        return (String) getValue("cWTRatexx");
+    public Double getWTRate() {
+        return Double.parseDouble(String.valueOf(getValue("nWTRatexx")));
     }
     
     /**
