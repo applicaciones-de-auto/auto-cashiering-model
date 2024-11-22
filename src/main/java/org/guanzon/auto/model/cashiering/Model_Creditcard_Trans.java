@@ -19,6 +19,7 @@ import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
+import org.guanzon.appdriver.constant.TransactionStatus;
 import org.guanzon.appdriver.iface.GEntity;
 import org.json.simple.JSONObject;
 
@@ -62,10 +63,10 @@ final String XML = "Model_Creditcard_Trans.xml";
 
             MiscUtil.initRowSet(poEntity);        
 //            poEntity.updateObject("dTransact", poGRider.getServerDate()); 
-//            poEntity.updateString("", TransactionStatus.STATE_OPEN); 
 //            poEntity.updateObject("", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
 //            poEntity.updateDouble("", 0.00);  
 //            poEntity.updateInt("nEntryNox", 0);
+            poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN); 
             poEntity.updateBigDecimal("nAmountxx", new BigDecimal("0.00"));
            
             poEntity.insertRow();

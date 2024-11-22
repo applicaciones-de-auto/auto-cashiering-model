@@ -31,7 +31,7 @@ public class Model_SalesInvoice_Source implements GEntity{
 final String XML = "Model_SalesInvoice_Source.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
-    private String psExclude = ""; //»
+    private String psExclude = "sFormNoxx»sDescript"; //»
     
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset

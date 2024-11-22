@@ -319,7 +319,7 @@ final String XML = "Model_SalesInvoice_Payment.xml";
                 Model_SalesInvoice_Payment loOldEntity = new Model_SalesInvoice_Payment(poGRider);
                 
                 //replace with the primary key column info
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(), this.getPayTrnCD());
 
                 if ("success".equals((String) loJSON.get("result"))) {
 //                    setModifiedBy(poGRider.getUserID());
