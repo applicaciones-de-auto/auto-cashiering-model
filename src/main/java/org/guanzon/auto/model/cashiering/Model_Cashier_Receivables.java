@@ -31,7 +31,7 @@ public class Model_Cashier_Receivables implements GEntity{
 final String XML = "Model_Cashier_Receivables.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
-    private String psExclude = "sPayerNme»sPayerIDx»sPayerAdd»sOwnrNmxx»cClientTp»sAddressx»sBankName»sBankAddr»sInsNamex»sInsAddrx"
+    private String psExclude = "sPayerNme»sPayerIDx»sPayerAdd»sOwnrNmxx»cClientTp»sTaxIDNox»sAddressx»sBankName»sBankAddr»sInsNamex»sInsAddrx"
                             + "»sFormNoxx»sVSPNoxxx»sVSANoxxx»sInsAppNo»sCSNoxxxx»sPlateNox»sDescript"; //»
     
     GRider poGRider;                //application driver
@@ -464,7 +464,8 @@ final String XML = "Model_Cashier_Receivables.xml";
                 + " 	ELSE ''  "                                                          
                 + "    END AS sPayerAdd "
                 + " , b.sCompnyNm AS sOwnrNmxx "                                                     
-                + " , b.cClientTp "                                                                  
+                + " , b.cClientTp "                                                            
+                + " , b.sTaxIDNox "                                                      
                 + " , TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), "                    
                 + "   IFNULL(CONCAT(d.sAddressx,' ') , ''), "                                        
                 + "   IFNULL(CONCAT(e.sBrgyName,' '), ''),  "                                        
@@ -892,6 +893,23 @@ final String XML = "Model_Cashier_Receivables.xml";
      */
     public String getClientTp() {
         return (String) getValue("cClientTp");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setTaxIDNo(String fsValue) {
+        return setValue("sTaxIDNox", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getTaxIDNo() {
+        return (String) getValue("sTaxIDNox");
     }
     
     /**
