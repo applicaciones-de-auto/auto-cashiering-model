@@ -32,7 +32,7 @@ public class Model_SalesInvoice_Payment implements GEntity{
 final String XML = "Model_SalesInvoice_Payment.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
-    private String psExclude = "sApprovNo»sBankName»sBankIDxx»sCardNoxx»sApprovNo»sTraceNox»sRemarksx"; //»
+    private String psExclude = "sApprovNo»sBankName»sBankIDxx»sCardNoxx»sApprovNo»sTraceNox»sRemarksx»sGCertNox»sGCPayLod»sGCRemrks"; //»
     
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -448,9 +448,13 @@ final String XML = "Model_SalesInvoice_Payment.xml";
                 + "  , b.sTraceNox "          
                 + "  , b.sRemarksx " 
                 + "  , c.sBankName "
+                + "  , d.sGCertNox "             
+                + "  , d.sPayLoadx AS sGCPayLod "
+                + "  , d.sRemarksx AS sGCRemrks "
                 + " FROM si_master_payment a "
                 + " LEFT JOIN credit_card_trans b ON b.sTransNox = a.sPayTrnCD AND b.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
-                + " LEFT JOIN banks c ON c.sBankIDxx = b.sBankIDxx ";             
+                + " LEFT JOIN banks c ON c.sBankIDxx = b.sBankIDxx "
+                + " LEFT JOIN gift_check d ON d.sTransNox = a.sPayTrnCD  ";             
     }
     
     private static String xsDateShort(Date fdValue) {
@@ -646,6 +650,57 @@ final String XML = "Model_SalesInvoice_Payment.xml";
      */
     public String getCCBankName() {
         return (String) getValue("sBankName");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setGCertNo(String fsValue) {
+        return setValue("sGCertNox", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getGCertNo() {
+        return (String) getValue("sGCertNox");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setGCPayLod(String fsValue) {
+        return setValue("sGCPayLod", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getGCPayLod() {
+        return (String) getValue("sGCPayLod");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setGCRemrks(String fsValue) {
+        return setValue("sGCRemrks", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getGCRemrks() {
+        return (String) getValue("sGCRemrks");
     }
 //    
 //    /**

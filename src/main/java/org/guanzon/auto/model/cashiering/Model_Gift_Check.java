@@ -286,9 +286,16 @@ final String XML = "Model_Gift_Check.xml";
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
                 setModifiedBy(poGRider.getUserID());
                 setModifiedDte(poGRider.getServerDate());
+                if(getPayLoad().isEmpty()){
+                    if(psExclude.isEmpty()){
+                        psExclude = "sPayloadx";
+                    } else {
+                        psExclude = psExclude + "»" + "sPayloadx";
+                    }
+                }
                 
                 //replace with the primary key column info
-                lsSQL = MiscUtil.makeSQL(this, psExclude);
+                lsSQL = MiscUtil.makeSQL(this, "sPayloadx");
                 
                // lsSQL = "Select * FROM " + getTable() + " a left join (" + makeSQL() + ") b on a.column1 = b.column "
                 if (!lsSQL.isEmpty()) {
@@ -312,6 +319,13 @@ final String XML = "Model_Gift_Check.xml";
                 if ("success".equals((String) loJSON.get("result"))) {
                     setModifiedBy(poGRider.getUserID());
                     setModifiedDte(poGRider.getServerDate());
+                    if(getPayLoad().isEmpty()){
+                        if(psExclude.isEmpty()){
+                            psExclude = "sPayloadx";
+                        } else {
+                            psExclude = psExclude + "»" + "sPayloadx";
+                        }
+                    }
                     
                     //replace the condition based on the primary key column of the record
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()), psExclude);
