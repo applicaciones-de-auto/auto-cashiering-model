@@ -286,16 +286,27 @@ final String XML = "Model_Gift_Check.xml";
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
                 setModifiedBy(poGRider.getUserID());
                 setModifiedDte(poGRider.getServerDate());
-                if(getPayLoad().isEmpty()){
-                    if(psExclude.isEmpty()){
+                
+                if(getPayLoad() == null){
+                    setPayLoad("{}");
+                    if(psExclude.isEmpty()){ //Try to exclude when payload is empty
                         psExclude = "sPayloadx";
                     } else {
                         psExclude = psExclude + "»" + "sPayloadx";
                     }
+                } else {
+                    if(getPayLoad().isEmpty()){
+                        setPayLoad("{}");
+                        if(psExclude.isEmpty()){ //Try to exclude when payload is empty
+                            psExclude = "sPayloadx";
+                        } else {
+                            psExclude = psExclude + "»" + "sPayloadx";
+                        }
+                    }
                 }
                 
                 //replace with the primary key column info
-                lsSQL = MiscUtil.makeSQL(this, "sPayloadx");
+                lsSQL = MiscUtil.makeSQL(this, psExclude);
                 
                // lsSQL = "Select * FROM " + getTable() + " a left join (" + makeSQL() + ") b on a.column1 = b.column "
                 if (!lsSQL.isEmpty()) {
@@ -319,11 +330,22 @@ final String XML = "Model_Gift_Check.xml";
                 if ("success".equals((String) loJSON.get("result"))) {
                     setModifiedBy(poGRider.getUserID());
                     setModifiedDte(poGRider.getServerDate());
-                    if(getPayLoad().isEmpty()){
-                        if(psExclude.isEmpty()){
+                    
+                    if(getPayLoad() == null){
+                        setPayLoad("{}");
+                        if(psExclude.isEmpty()){ //Try to exclude when payload is empty
                             psExclude = "sPayloadx";
                         } else {
                             psExclude = psExclude + "»" + "sPayloadx";
+                        }
+                    } else {
+                        if(getPayLoad().isEmpty()){
+                            setPayLoad("{}");
+                            if(psExclude.isEmpty()){ //Try to exclude when payload is empty
+                                psExclude = "sPayloadx";
+                            } else {
+                                psExclude = psExclude + "»" + "sPayloadx";
+                            }
                         }
                     }
                     
@@ -438,7 +460,7 @@ final String XML = "Model_Gift_Check.xml";
     }
     
     public String getSQL(){
-        return    " SELECT "            
+        return    " SELECT "          
                 + "    a.sTransNox "    
                 + "  , a.sSourceCD "    
                 + "  , a.sSourceNo "    
