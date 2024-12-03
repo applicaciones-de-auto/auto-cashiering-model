@@ -19,6 +19,7 @@ import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
+import org.guanzon.appdriver.constant.TransactionStatus;
 import org.guanzon.appdriver.iface.GEntity;
 import org.json.simple.JSONObject;
 
@@ -26,11 +27,11 @@ import org.json.simple.JSONObject;
  *
  * @author Arsiela
  */
-public class Model_Cashier_Receivables_Detail implements GEntity{
-final String XML = "Model_Cashier_Receivables_Detail.xml";
+public class Model_Creditcard_Trans implements GEntity{
+final String XML = "Model_Creditcard_Trans.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
-    private String psExclude = ""; //»
+    private String psExclude = "sBankName"; //»
     
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -42,7 +43,7 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
      *
      * @param foValue - GhostRider Application Driver
      */
-    public Model_Cashier_Receivables_Detail(GRider foValue) {
+    public Model_Creditcard_Trans(GRider foValue) {
         if (foValue == null) {
             System.err.println("Application Driver is not set.");
             System.exit(1);
@@ -62,16 +63,12 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
 
             MiscUtil.initRowSet(poEntity);        
 //            poEntity.updateObject("dTransact", poGRider.getServerDate()); 
-//            poEntity.updateString("", TransactionStatus.STATE_OPEN); 
 //            poEntity.updateObject("", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
 //            poEntity.updateDouble("", 0.00);  
 //            poEntity.updateInt("nEntryNox", 0);
-            poEntity.updateBigDecimal("nGrossAmt", new BigDecimal("0.00"));                     
-            poEntity.updateBigDecimal("nDiscAmtx", new BigDecimal("0.00"));                     
-            poEntity.updateBigDecimal("nDeductnx", new BigDecimal("0.00"));                     
-            poEntity.updateBigDecimal("nTotalAmt", new BigDecimal("0.00"));                   
-            poEntity.updateBigDecimal("nAmtPaidx", new BigDecimal("0.00")); 
-
+            poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN); 
+            poEntity.updateBigDecimal("nAmountxx", new BigDecimal("0.00"));
+           
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
             poEntity.absolute(1);
@@ -135,7 +132,7 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
 
     @Override
     public String getTable() {
-        return "cashier_receivables_detail";
+        return "credit_card_trans";
     }
     
     /**
@@ -231,6 +228,9 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
     public JSONObject newRecord() {
         pnEditMode = EditMode.ADDNEW;
         
+        //replace with the primary key column info
+        setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+
         poJSON = new JSONObject();
         poJSON.put("result", "success");
         return poJSON;
@@ -238,24 +238,11 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
     
     @Override
     public JSONObject openRecord(String fsValue) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    /**
-     * Opens a record.
-     *
-     * @param fsValue - filter values
-     * @param fsValue2 - filter values
-     * @return result as success/failed
-     */
-    public JSONObject openRecord(String fsValue, String fsValue2) {
         poJSON = new JSONObject();
 
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this, psExclude); //exclude the columns called thru left join
         //replace the condition based on the primary key column of the record
         lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue)
-                                                +  " AND a.sTranType = " + SQLUtil.toSQL(fsValue2)
-                                                //+ " GROUP BY a.sTransNox "
                                                 );
 
         System.out.println(lsSQL);
@@ -296,6 +283,11 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
             String lsSQL; 
             if (pnEditMode == EditMode.ADDNEW) {
                 //replace with the primary key column info
+                setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+                setModifiedBy(poGRider.getUserID());
+                setModifiedDte(poGRider.getServerDate());
+                
+                //replace with the primary key column info
                 lsSQL = MiscUtil.makeSQL(this, psExclude);
                 
                // lsSQL = "Select * FROM " + getTable() + " a left join (" + makeSQL() + ") b on a.column1 = b.column "
@@ -305,21 +297,21 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
                         poJSON.put("message", "Record saved successfully.");
                     } else {
                         poJSON.put("result", "error");
-                        poJSON.put("message", "Error while saving cashier receivables detail.\n\n" + poGRider.getErrMsg());
+                        poJSON.put("message", "Error while saving Creditcard Transaction.\n\n" + poGRider.getErrMsg());
                     }
                 } else {
                     poJSON.put("result", "error");
-                    poJSON.put("message", "Error while saving cashier receivables detail.\n\n" + "No record to save.");
+                    poJSON.put("message", "Error while saving Creditcard Transaction.\n\n" + "No record to save.");
                 }
             } else {
-                Model_Cashier_Receivables_Detail loOldEntity = new Model_Cashier_Receivables_Detail(poGRider);
+                Model_Creditcard_Trans loOldEntity = new Model_Creditcard_Trans(poGRider);
                 
                 //replace with the primary key column info
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(), this.getTranType());
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
 
                 if ("success".equals((String) loJSON.get("result"))) {
-//                    setModifiedBy(poGRider.getUserID());
-//                    setModifiedDte(poGRider.getServerDate());
+                    setModifiedBy(poGRider.getUserID());
+                    setModifiedDte(poGRider.getServerDate());
                     
                     //replace the condition based on the primary key column of the record
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()), psExclude);
@@ -330,7 +322,7 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
                             poJSON.put("message", "Record saved successfully.");
                         } else {
                             poJSON.put("result", "error");
-                            poJSON.put("message",  "Error while saving cashier receivables detail.\n\n" + poGRider.getErrMsg());
+                            poJSON.put("message",  "Error while saving Creditcard Transaction.\n\n" + poGRider.getErrMsg());
                         }
                     } else {
                         poJSON.put("result", "success");
@@ -338,12 +330,12 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
                     }
                 } else {
                     poJSON.put("result", "error");
-                    poJSON.put("message", "Error while saving cashier receivables detail.\n\n" + "Record discrepancy. Unable to save record.");
+                    poJSON.put("message", "Record discrepancy. Unable to save record.");
                 }
             }
         } else {
             poJSON.put("result", "error");
-            poJSON.put("message", "Error while saving cashier receivables detail.\n\n" + "Invalid update mode. Unable to save record.");
+            poJSON.put("message", "Invalid update mode. Unable to save record.");
             return poJSON;
         }
 
@@ -432,17 +424,20 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
     }
     
     public String getSQL(){
-        return    " SELECT "                           
-                + "    a.sTransNox "                   
-                + "  , a.nEntryNox "                   
-                + "  , a.sTranType "                   
-                + "  , a.nGrossAmt "                   
-                + "  , a.nDiscAmtx "                   
-                + "  , a.nDeductnx "                   
-                + "  , a.nTotalAmt "                   
-                + "  , a.nAmtPaidx "                   
-                + " FROM cashier_receivables_detail a ";                                                
-                           
+        return    " SELECT "                  
+                + "    a.sTransNox "          
+                + "  , a.sBankIDxx "          
+                + "  , a.sCardNoxx "          
+                + "  , a.sApprovNo "          
+                + "  , a.sTraceNox "          
+                + "  , a.nAmountxx "          
+                + "  , a.sRemarksx "          
+                + "  , a.cTranStat "          
+                + "  , a.sModified "          
+                + "  , a.dModified "    
+                + "  , b.sBankName "      
+                + " FROM credit_card_trans a "
+                + " LEFT JOIN banks b ON b.sBankIDxx = a.sBankIDxx ";             
     }
     
     private static String xsDateShort(Date fdValue) {
@@ -489,95 +484,83 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
      * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setTranType(String fsValue) {
-        return setValue("sTranType", fsValue);
+    public JSONObject setBankID(String fsValue) {
+        return setValue("sBankIDxx", fsValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public String getTranType() {
-        return (String) getValue("sTranType");
+    public String getBankID() {
+        return (String) getValue("sBankIDxx");
     }
     
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fnValue
+     * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setEntryNo(Integer fnValue) {
-        return setValue("nEntryNox", fnValue);
+    public JSONObject setCardNo(String fsValue) {
+        return setValue("sCardNoxx", fsValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Integer getEntryNo() {
-        return Integer.parseInt(String.valueOf(getValue("nEntryNox")));
+    public String getCardNo() {
+        return (String) getValue("sCardNoxx");
     }
     
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fdbValue
+     * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setGrossAmt(BigDecimal fdbValue) {
-        return setValue("nGrossAmt", fdbValue);
+    public JSONObject setApprovNo(String fsValue) {
+        return setValue("sApprovNo", fsValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public BigDecimal getGrossAmt() {
-        if(getValue("nGrossAmt") == null || getValue("nGrossAmt").equals("")){
-            return new BigDecimal("0.00");
-        } else {
-            return new BigDecimal(String.valueOf(getValue("nGrossAmt")));
-        }
+    public String getApprovNo() {
+        return (String) getValue("sApprovNo");
     }
     
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fdbValue
+     * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setDiscAmt(BigDecimal fdbValue) {
-        return setValue("nDiscAmtx", fdbValue);
+    public JSONObject setTraceNo(String fsValue) {
+        return setValue("sTraceNox", fsValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public BigDecimal getDiscAmt() {
-        if(getValue("nDiscAmtx") == null || getValue("nDiscAmtx").equals("")){
-            return new BigDecimal("0.00");
-        } else {
-            return new BigDecimal(String.valueOf(getValue("nDiscAmtx")));
-        }
+    public String getTraceNo() {
+        return (String) getValue("sTraceNox");
     }
     
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fdbValue
+     * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setDeductn(BigDecimal fdbValue) {
-        return setValue("nDeductnx", fdbValue);
+    public JSONObject setRemarks(String fsValue) {
+        return setValue("sRemarksx", fsValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public BigDecimal getDeductn() {
-        if(getValue("nDeductnx") == null || getValue("nDeductnx").equals("")){
-            return new BigDecimal("0.00");
-        } else {
-            return new BigDecimal(String.valueOf(getValue("nDeductnx")));
-        }
+    public String getRemarks() {
+        return (String) getValue("sRemarksx");
     }
     
     /**
@@ -586,40 +569,87 @@ final String XML = "Model_Cashier_Receivables_Detail.xml";
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setTotalAmt(BigDecimal fdbValue) {
-        return setValue("nTotalAmt", fdbValue);
+    public JSONObject setAmount(BigDecimal fdbValue) {
+        return setValue("nAmountxx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public BigDecimal getTotalAmt() {
-        if(getValue("nTotalAmt") == null || getValue("nTotalAmt").equals("")){
+    public BigDecimal getAmount() {
+        if(getValue("nAmountxx") == null || getValue("nAmountxx").equals("")){
             return new BigDecimal("0.00");
         } else {
-            return new BigDecimal(String.valueOf(getValue("nTotalAmt")));
+            return new BigDecimal(String.valueOf(getValue("nAmountxx")));
         }
     }
     
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fdbValue
+     * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setAmtPaid(BigDecimal fdbValue) {
-        return setValue("nAmtPaidx", fdbValue);
+    public JSONObject setTranStat(String fsValue) {
+        return setValue("cTranStat", fsValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public BigDecimal getAmtPaid() {
-        if(getValue("nAmtPaidx") == null || getValue("nAmtPaidx").equals("")){
-            return new BigDecimal("0.00");
-        } else {
-            return new BigDecimal(String.valueOf(getValue("nAmtPaidx")));
-        }
+    public String getTranStat() {
+        return (String) getValue("cTranStat");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setModifiedBy(String fsValue) {
+        return setValue("sModified", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getModifiedBy() {
+        return (String) getValue("sModified");
+    }
+    
+    /**
+     * Sets the date and time the record was modified.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setModifiedDte(Date fdValue) {
+        return setValue("dModified", fdValue);
+    }
+
+    /**
+     * @return The date and time the record was modified.
+     */
+    public Date getModifiedDte() {
+        return (Date) getValue("dModified");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setBankName(String fsValue) {
+        return setValue("sBankName", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBankName() {
+        return (String) getValue("sBankName");
     }
     
 }

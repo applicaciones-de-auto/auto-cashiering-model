@@ -70,7 +70,8 @@ public class Model_SalesInvoice_Master implements GEntity {
             poEntity.updateBigDecimal("nNonVATSl", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nZroVATSl", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nCWTAmtxx", new BigDecimal("0.00"));
-            poEntity.updateBigDecimal("cWTRatexx", new BigDecimal("0.00"));
+//            poEntity.updateBigDecimal("cWTRatexx", new BigDecimal("0.00"));
+            poEntity.updateDouble("nWTRatexx", 0.00);
             poEntity.updateBigDecimal("nNetTotal", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nCashAmtx", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nChckAmtx", new BigDecimal("0.00"));
@@ -438,7 +439,7 @@ public class Model_SalesInvoice_Master implements GEntity {
                 + "  , a.nVatAmtxx "                                                                                               
                 + "  , a.nNonVATSl "                                                                                               
                 + "  , a.nZroVATSl "                                                                                               
-                + "  , a.cWTRatexx "                                                                                               
+                + "  , a.nWTRatexx "                                                                                               
                 + "  , a.nCWTAmtxx "                                                                                               
                 + "  , a.nAdvPaymx "                                                                                               
                 + "  , a.nNetTotal "                                                                                               
@@ -460,14 +461,24 @@ public class Model_SalesInvoice_Master implements GEntity {
                 + "     ELSE 'ACTIVE'   "                                                                                          
                 + "    END AS sTranStat "                                                                                          
                 /*BUYING COSTUMER*/                                                                                                
-                + " , b.sCompnyNm AS sBuyCltNm "                                                                                   
+//                + " , b.sCompnyNm AS sBuyCltNm "                                                                                   
                 + " , b.cClientTp              "                                                                                  
                 + " , b.sTaxIDNox              "                                                                                    
-                + " , TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), "                                                  
-                + "    IFNULL(CONCAT(d.sAddressx,' ') , ''),                    "                                                  
-                + "    IFNULL(CONCAT(e.sBrgyName,' '), ''),                     "                                                  
-                + "    IFNULL(CONCAT(f.sTownName, ', '),''),                    "                                                  
-                + "    IFNULL(CONCAT(g.sProvName),'') )	, '')) AS sAddressx     "                                                  
+//                + " , TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), "                                                  
+//                + "    IFNULL(CONCAT(d.sAddressx,' ') , ''),                    "                                                  
+//                + "    IFNULL(CONCAT(e.sBrgyName,' '), ''),                     "                                                  
+//                + "    IFNULL(CONCAT(f.sTownName, ', '),''),                    "                                                  
+//                + "    IFNULL(CONCAT(g.sProvName),'') )	, '')) AS sAddressx     "    
+                + " , CASE "                                                                                                                                 
+                + " WHEN (h.sBrBankID != NULL || TRIM(h.sBrBankID) != '' )THEN CONCAT(k.sBankName, ' ', h.sBrBankNm) "                                       
+                + " WHEN (l.sBrInsIDx != NULL || TRIM(l.sBrInsIDx) != '' )THEN CONCAT(o.sInsurNme, ' ', l.sBrInsNme) "                                       
+                + " ELSE b.sCompnyNm   END AS sBuyCltNm "                                                                                                    
+                + " , CASE "                                                                                                                                 
+                + " WHEN (h.sBrBankID != NULL || TRIM(h.sBrBankID) != '' )THEN CONCAT(IFNULL(h.sAddressx, ''), i.sTownName, j.sProvName) "                   
+                + " WHEN (l.sBrInsIDx != NULL || TRIM(l.sBrInsIDx) != '' )THEN CONCAT(IFNULL(l.sAddressx, ''), m.sTownName, n.sProvName) "                   
+                + " ELSE TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), IFNULL(CONCAT(d.sAddressx,' ') , ''), "                                   
+                + " IFNULL(CONCAT(e.sBrgyName,' '), ''),   IFNULL(CONCAT(f.sTownName, ', '),''), IFNULL(CONCAT(g.sProvName),'') )	, ''))   END AS sAddressx "
+                
                 + " FROM si_master a  "                                                                                            
                  /*CUSTOMER*/                                                                                                      
                 + " LEFT JOIN client_master b ON b.sClientID = a.sClientID  "                                                      
@@ -477,7 +488,17 @@ public class Model_SalesInvoice_Master implements GEntity {
                 + " LEFT JOIN towncity f ON f.sTownIDxx = d.sTownIDxx  "                                                           
                 + " LEFT JOIN province g ON g.sProvIDxx = f.sProvIDxx  "                                                           
                 + " LEFT JOIN client_mobile ba ON ba.sClientID = b.sClientID AND ba.cPrimaryx = 1 "                                
-                + " LEFT JOIN client_email_address bb ON bb.sClientID = b.sClientID AND bb.cPrimaryx = 1 ";                           
+                + " LEFT JOIN client_email_address bb ON bb.sClientID = b.sClientID AND bb.cPrimaryx = 1 "
+                /*BANK*/                                                                   
+                + " LEFT JOIN banks_branches h ON h.sBrBankID = a.sClientID "              
+                + " LEFT JOIN towncity i ON i.sTownIDxx = h.sTownIDxx "                    
+                + " LEFT JOIN province j ON j.sProvIDxx = i.sProvIDxx "                    
+                + " LEFT JOIN banks k ON k.sBankIDxx = h.sBankIDxx "                       
+                /*INSURANCE*/                                                              
+                + " LEFT JOIN insurance_company_branches l ON l.sBrInsIDx = a.sClientID "  
+                + " LEFT JOIN towncity m ON m.sTownIDxx = l.sTownIDxx "                    
+                + " LEFT JOIN province n ON n.sProvIDxx = m.sProvIDxx "                    
+                + " LEFT JOIN insurance_company o ON o.sInsurIDx = l.sInsurIDx "           ;                           
     }
     
     /**
@@ -713,21 +734,23 @@ public class Model_SalesInvoice_Master implements GEntity {
         }
     }
     
+    
+    
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fsValue
+     * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setWTRate(String fsValue) {
-        return setValue("cWTRatexx", fsValue);
+    public JSONObject setWTRate(Double fdbValue) {
+        return setValue("nWTRatexx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public String getWTRate() {
-        return (String) getValue("cWTRatexx");
+    public Double getWTRate() {
+        return Double.parseDouble(String.valueOf(getValue("nWTRatexx")));
     }
     
     /**
