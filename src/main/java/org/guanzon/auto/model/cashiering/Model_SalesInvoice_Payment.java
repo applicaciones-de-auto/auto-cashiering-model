@@ -326,7 +326,7 @@ final String XML = "Model_SalesInvoice_Payment.xml";
 //                    setModifiedDte(poGRider.getServerDate());
                     
                     //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()), psExclude);
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND sPayTrnCD = " + SQLUtil.toSQL(this.getPayTrnCD()), psExclude);
 
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), getTargetBranchCd()) > 0) {
@@ -338,6 +338,7 @@ final String XML = "Model_SalesInvoice_Payment.xml";
                         }
                     } else {
                         poJSON.put("result", "success");
+                        poJSON.put("continue", true);
                         poJSON.put("message", "No updates has been made.");
                     }
                 } else {
@@ -367,7 +368,7 @@ final String XML = "Model_SalesInvoice_Payment.xml";
         
         String lsSQL = " DELETE FROM "+getTable()+" WHERE "
                     + " sTransNox = " + SQLUtil.toSQL(getTransNo())
-                    + " sPayTrnCD = " + SQLUtil.toSQL(getPayTrnCD());
+                    + " AND sPayTrnCD = " + SQLUtil.toSQL(getPayTrnCD());
         if (!lsSQL.isEmpty()) {
             if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
                 poJSON.put("result", "success");
