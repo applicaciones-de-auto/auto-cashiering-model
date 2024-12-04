@@ -452,14 +452,14 @@ final String XML = "Model_Cashier_Receivables.xml";
                 + "    END AS sPayerIDx " 
                 + " , CASE "
                 + "     WHEN a.cPayerCde = 'a' THEN '' " //ASSOCIATE
-                + "     WHEN a.cPayerCde = 'b' THEN CONCAT(IFNULL(h.sAddressx, ''), i.sTownName, j.sProvName) " //BANK
+                + "     WHEN a.cPayerCde = 'b' THEN TRIM(CONCAT_WS(' ',IFNULL(h.sAddressx, ''), i.sTownName, j.sProvName)) " //BANK
                 + "     WHEN a.cPayerCde = 'c' THEN " //CUSTOMER
                 + "     TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), "                    
                 + "   IFNULL(CONCAT(d.sAddressx,' ') , ''), "                                        
                 + "   IFNULL(CONCAT(e.sBrgyName,' '), ''),  "                                        
                 + "   IFNULL(CONCAT(f.sTownName, ', '),''), "                                        
                 + "   IFNULL(CONCAT(g.sProvName),'') ), '')) "
-                + "     WHEN a.cPayerCde = 'i' THEN CONCAT(IFNULL(l.sAddressx, ''), m.sTownName, n.sProvName) " //INSURANCE
+                + "     WHEN a.cPayerCde = 'i' THEN TRIM(CONCAT_WS(' ',IFNULL(l.sAddressx, ''), m.sTownName, n.sProvName)) " //INSURANCE
                 + "     WHEN a.cPayerCde = 's' THEN '' " //SUPPLIER                                  
                 + " 	ELSE ''  "                                                          
                 + "    END AS sPayerAdd "

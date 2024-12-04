@@ -62,7 +62,8 @@ public class Model_SalesInvoice_Master implements GEntity {
             MiscUtil.initRowSet(poEntity);        
             poEntity.updateObject("dTransact", poGRider.getServerDate()); 
             poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN); //TransactionStatus.STATE_OPEN why is the value of STATE_OPEN is 0 while record status active is 1
-             
+            poEntity.updateString("cPrintedx", "0"); 
+            
             poEntity.updateBigDecimal("nTranTotl", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nDiscount", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nVatSales", new BigDecimal("0.00"));
@@ -474,8 +475,8 @@ public class Model_SalesInvoice_Master implements GEntity {
                 + " WHEN (l.sBrInsIDx != NULL || TRIM(l.sBrInsIDx) != '' )THEN CONCAT(o.sInsurNme, ' ', l.sBrInsNme) "                                       
                 + " ELSE b.sCompnyNm   END AS sBuyCltNm "                                                                                                    
                 + " , CASE "                                                                                                                                 
-                + " WHEN (h.sBrBankID != NULL || TRIM(h.sBrBankID) != '' )THEN CONCAT(IFNULL(h.sAddressx, ''), i.sTownName, j.sProvName) "                   
-                + " WHEN (l.sBrInsIDx != NULL || TRIM(l.sBrInsIDx) != '' )THEN CONCAT(IFNULL(l.sAddressx, ''), m.sTownName, n.sProvName) "                   
+                + " WHEN (h.sBrBankID != NULL || TRIM(h.sBrBankID) != '' )THEN TRIM(CONCAT_WS(' ',IFNULL(h.sAddressx, ''), i.sTownName, j.sProvName)) "                   
+                + " WHEN (l.sBrInsIDx != NULL || TRIM(l.sBrInsIDx) != '' )THEN TRIM(CONCAT_WS(' ',IFNULL(l.sAddressx, ''), m.sTownName, n.sProvName)) "                   
                 + " ELSE TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), IFNULL(CONCAT(d.sAddressx,' ') , ''), "                                   
                 + " IFNULL(CONCAT(e.sBrgyName,' '), ''),   IFNULL(CONCAT(f.sTownName, ', '),''), IFNULL(CONCAT(g.sProvName),'') )	, ''))   END AS sAddressx "
                 
