@@ -31,7 +31,7 @@ public class Model_Cashier_Receivables implements GEntity{
 final String XML = "Model_Cashier_Receivables.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
-    private String psExclude = "sPayerNme»sPayerIDx»sPayerAdd»sOwnrNmxx»cClientTp»sTaxIDNox»sAddressx»sBankName»sBankAddr»sInsNamex»sInsAddrx"
+    private String psExclude = "sPayerNme»sPayerIDx»sPayerAdd»sOwnrNmxx»cClientTp»sTaxIDNox»sAddressx»sBankName»sBankAddr»sInsNamex»sInsAddrx»sSINoxxxx"
                             + "»sFormNoxx»sVSPNoxxx»sVSANoxxx»sInsAppNo»sCSNoxxxx»sPlateNox»sDescript"; //»
     
     GRider poGRider;                //application driver
@@ -255,7 +255,7 @@ final String XML = "Model_Cashier_Receivables.xml";
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this, psExclude); //exclude the columns called thru left join
         //replace the condition based on the primary key column of the record
         lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue)
-                                                //+ " GROUP BY a.sTransNox "
+                                                + " GROUP BY a.sTransNox "
                                                 );
 
         System.out.println(lsSQL);
@@ -472,16 +472,17 @@ final String XML = "Model_Cashier_Receivables.xml";
                 + "   IFNULL(CONCAT(f.sTownName, ', '),''), "                                        
                 + "   IFNULL(CONCAT(g.sProvName),'') ), '')) AS sAddressx "                          
                 + " , CONCAT(k.sBankName, ' ', h.sBrBankNm) AS sBankName  "                          
-                + " , CONCAT(IFNULL(h.sAddressx, ''), i.sTownName, j.sProvName) AS sBankAddr "       
+                + " , TRIM(CONCAT_WS(' ', IFNULL(h.sAddressx, ''), i.sTownName, j.sProvName)) AS sBankAddr "       
                 + " , CONCAT(o.sInsurNme, ' ', l.sBrInsNme) AS sInsNamex "                           
-                + " , CONCAT(IFNULL(l.sAddressx, ''), m.sTownName, n.sProvName) AS sInsAddrx "  
+                + " , TRIM(CONCAT_WS(' ',IFNULL(l.sAddressx, ''), m.sTownName, n.sProvName)) AS sInsAddrx "  
                 + " , IFNULL(p.sVSPNOxxx, IFNULL(q.sReferNox, IFNULL(r.sReferNox, ''))) AS sFormNoxx "  
                 + " , p.sVSPNOxxx AS sVSPNoxxx "                                                        
                 + " , q.sReferNox AS sVSANoxxx "                                                        
                 + " , r.sReferNox AS sInsAppNo "                                                        
                 + " , aa.sCSNoxxxx "                                                                    
                 + " , bb.sPlateNox "                                                                    
-                + " , cc.sDescript "                                                                    
+                + " , cc.sDescript "
+                + " , GROUP_CONCAT(u.sReferNox) AS sSINoxxxx "                                                                    
                 + " FROM cashier_receivables a  "                                                    
                 + " LEFT JOIN client_master b ON b.sClientID = a.sClientID "                         
                 + " LEFT JOIN client_address c ON c.sClientID = a.sClientID AND c.cPrimaryx = 1 "    
@@ -505,7 +506,9 @@ final String XML = "Model_Cashier_Receivables.xml";
                 /*VEHICLE INFORMATION*/                                                                       
                 + " LEFT JOIN vehicle_serial aa ON aa.sSerialID = p.sSerialID OR aa.sSerialID = s.sSerialID " 
                 + " LEFT JOIN vehicle_serial_registration bb ON bb.sSerialID = aa.sSerialID "                 
-                + " LEFT JOIN vehicle_master cc ON cc.sVhclIDxx = aa.sVhclIDxx "  ;                                                
+                + " LEFT JOIN vehicle_master cc ON cc.sVhclIDxx = aa.sVhclIDxx "
+                + " LEFT JOIN si_master_source t ON t.sSourceNo = a.sTransNox " 
+                + " LEFT JOIN si_master u on u.sTransNox = t.sReferNox AND u.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED);                                                
 
     }
     
@@ -1114,5 +1117,22 @@ final String XML = "Model_Cashier_Receivables.xml";
      */
     public String getInsAddr() {
         return (String) getValue("sInsAddrx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setSINo(String fsValue) {
+        return setValue("sSINoxxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getSINo() {
+        return (String) getValue("sSINoxxxx");
     }
 }
