@@ -482,7 +482,7 @@ final String XML = "Model_Cashier_Receivables.xml";
                 + " , aa.sCSNoxxxx "                                                                    
                 + " , bb.sPlateNox "                                                                    
                 + " , cc.sDescript "
-                + " , GROUP_CONCAT(u.sReferNox) AS sSINoxxxx "                                                                    
+                + " , GROUP_CONCAT(DISTINCT u.sReferNox) AS sSINoxxxx "                                                                    
                 + " FROM cashier_receivables a  "                                                    
                 + " LEFT JOIN client_master b ON b.sClientID = a.sClientID "                         
                 + " LEFT JOIN client_address c ON c.sClientID = a.sClientID AND c.cPrimaryx = 1 "    
