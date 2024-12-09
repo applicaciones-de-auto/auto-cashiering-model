@@ -10,6 +10,9 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import javax.sql.rowset.CachedRowSet;
 import org.guanzon.appdriver.base.CommonUtils;
@@ -28,6 +31,7 @@ import org.json.simple.JSONObject;
 public class Model_SalesInvoice_Master implements GEntity {
     final String XML = "Model_SalesInvoice_Master.xml";
     private final String psDefaultDate = "1900-01-01";
+    private String psOrigTransDte = "1900-01-01"; 
     private String psBranchCd;
     private String psExclude = "sTranStat»sBuyCltNm»cClientTp»sTaxIDNox»sAddressx";//»  
     
@@ -272,7 +276,7 @@ public class Model_SalesInvoice_Master implements GEntity {
                 for (int lnCtr = 1; lnCtr <= loRS.getMetaData().getColumnCount(); lnCtr++) {
                     setValue(lnCtr, loRS.getObject(lnCtr));
                 }
-
+                psOrigTransDte = xsDateShort(getTransactDte());
                 pnEditMode = EditMode.UPDATE;
 
                 poJSON.put("result", "success");
@@ -502,6 +506,27 @@ public class Model_SalesInvoice_Master implements GEntity {
                 + " LEFT JOIN insurance_company o ON o.sInsurIDx = l.sInsurIDx "           ;                           
     }
     
+    private static String xsDateShort(Date fdValue) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String date = sdf.format(fdValue);
+        return date;
+    }
+
+    private static String xsDateShort(String fsValue) throws org.json.simple.parser.ParseException, java.text.ParseException {
+        SimpleDateFormat fromUser = new SimpleDateFormat("MMMM dd, yyyy");
+        SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String lsResult = "";
+        lsResult = myFormat.format(fromUser.parse(fsValue));
+        return lsResult;
+    }
+    
+    /*Convert Date to String*/
+    private LocalDate strToDate(String val) {
+        DateTimeFormatter date_formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDate = LocalDate.parse(val, date_formatter);
+        return localDate;
+    }
+    
     /**
      * Description: Sets the ID of this record.
      *
@@ -550,12 +575,29 @@ public class Model_SalesInvoice_Master implements GEntity {
      * @return The Value of this record.
      */
     public Date getTransactDte() {
+        
         Date date = null;
-        if(!getValue("dTransact").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("dTransact").toString());
+//        if(!getValue("dTransact").toString().isEmpty()){
+//            date = CommonUtils.toDate(getValue("dTransact").toString());
+//        }
+        
+        if(getValue("dTransact") == null || getValue("dTransact").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("dTransact")), SQLUtil.FORMAT_SHORT_DATE);
         }
         
         return date;
+    }
+    
+    /**
+     * @return The Value of this record.
+     */
+    public String getOrigTransactDte() {
+        if(psOrigTransDte.equals("1900-01-01")){
+            psOrigTransDte = xsDateShort(poGRider.getServerDate());
+        }
+        return psOrigTransDte;
     }
     
     /**
