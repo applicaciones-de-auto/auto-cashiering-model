@@ -31,7 +31,7 @@ public class Model_SalesInvoice_Source implements GEntity{
 final String XML = "Model_SalesInvoice_Source.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
-    private String psExclude = "sFormNoxx»sDescript"; //»
+    private String psExclude = "sFormNoxx»sDescript»cPayerCde"; //»
     
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -442,6 +442,7 @@ final String XML = "Model_SalesInvoice_Source.xml";
                 + "  , a.nEntryNox "
                 + "  , IFNULL( aa.sReferNox,IFNULL(c.sVSPNOxxx, IFNULL(d.sReferNox, IFNULL(e.sReferNox,'')))) AS sFormNoxx "
                 + "  , b.sSourceCD AS sDescript "
+                + "  , b.cPayerCde "
                 + " FROM si_master_source a "                                              
                 + " LEFT JOIN udr_master aa ON aa.sTransNox = a.sSourceNo "                
                 + " LEFT JOIN cashier_receivables b ON b.sTransNox = a.sSourceNo "         
@@ -689,6 +690,23 @@ final String XML = "Model_SalesInvoice_Source.xml";
      */
     public String getDescript() {
         return (String) getValue("sDescript");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setPayerCde(String fsValue) {
+        return setValue("cPayerCde", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getPayerCde() {
+        return (String) getValue("cPayerCde");
     }
     
 //    
