@@ -501,10 +501,10 @@ final String XML = "Model_Cashier_Receivables.xml";
                 + " LEFT JOIN province n ON n.sProvIDxx = m.sProvIDxx "                              
                 + " LEFT JOIN insurance_company o ON o.sInsurIDx = l.sInsurIDx "
                 /*TRANSACTION*/                                                                               
-                + " LEFT JOIN vsp_master p ON p.sTransNox = a.sReferNox  "                                    
-                + " LEFT JOIN customer_inquiry_reservation q ON q.sTransNox = a.sReferNox "                   
-                + " LEFT JOIN insurance_policy_application r ON r.sTransNox = a.sReferNox "                   
-                + " LEFT JOIN insurance_policy_proposal s ON s.sTransNox = r.sReferNox    "                   
+                + " LEFT JOIN vsp_master p ON p.sTransNox = a.sReferNox AND p.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)                                    
+                + " LEFT JOIN customer_inquiry_reservation q ON q.sTransNox = a.sReferNox AND q.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)                   
+                + " LEFT JOIN insurance_policy_application r ON r.sTransNox = a.sReferNox AND r.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)                   
+                + " LEFT JOIN insurance_policy_proposal s ON s.sTransNox = r.sReferNox AND s.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)                  
                 /*VEHICLE INFORMATION*/                                                                       
                 + " LEFT JOIN vehicle_serial aa ON aa.sSerialID = p.sSerialID OR aa.sSerialID = s.sSerialID " 
                 + " LEFT JOIN vehicle_serial_registration bb ON bb.sSerialID = aa.sSerialID "                 
