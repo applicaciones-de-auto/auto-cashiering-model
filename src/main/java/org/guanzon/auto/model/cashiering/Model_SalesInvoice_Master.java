@@ -10,6 +10,9 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import javax.sql.rowset.CachedRowSet;
 import org.guanzon.appdriver.base.CommonUtils;
@@ -28,6 +31,7 @@ import org.json.simple.JSONObject;
 public class Model_SalesInvoice_Master implements GEntity {
     final String XML = "Model_SalesInvoice_Master.xml";
     private final String psDefaultDate = "1900-01-01";
+    private String psOrigTransDte = "1900-01-01"; 
     private String psBranchCd;
     private String psExclude = "sTranStat»sBuyCltNm»cClientTp»sTaxIDNox»sAddressx";//»  
     
@@ -62,7 +66,8 @@ public class Model_SalesInvoice_Master implements GEntity {
             MiscUtil.initRowSet(poEntity);        
             poEntity.updateObject("dTransact", poGRider.getServerDate()); 
             poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN); //TransactionStatus.STATE_OPEN why is the value of STATE_OPEN is 0 while record status active is 1
-             
+            poEntity.updateString("cPrintedx", "0"); 
+            
             poEntity.updateBigDecimal("nTranTotl", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nDiscount", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nVatSales", new BigDecimal("0.00"));
@@ -271,7 +276,7 @@ public class Model_SalesInvoice_Master implements GEntity {
                 for (int lnCtr = 1; lnCtr <= loRS.getMetaData().getColumnCount(); lnCtr++) {
                     setValue(lnCtr, loRS.getObject(lnCtr));
                 }
-
+                psOrigTransDte = xsDateShort(getTransactDte());
                 pnEditMode = EditMode.UPDATE;
 
                 poJSON.put("result", "success");
@@ -470,12 +475,12 @@ public class Model_SalesInvoice_Master implements GEntity {
 //                + "    IFNULL(CONCAT(f.sTownName, ', '),''),                    "                                                  
 //                + "    IFNULL(CONCAT(g.sProvName),'') )	, '')) AS sAddressx     "    
                 + " , CASE "                                                                                                                                 
-                + " WHEN (h.sBrBankID != NULL || TRIM(h.sBrBankID) != '' )THEN CONCAT(k.sBankName, ' ', h.sBrBankNm) "                                       
-                + " WHEN (l.sBrInsIDx != NULL || TRIM(l.sBrInsIDx) != '' )THEN CONCAT(o.sInsurNme, ' ', l.sBrInsNme) "                                       
+                + " WHEN (h.sBrBankID != NULL || TRIM(h.sBrBankID) != '' )THEN CONCAT(k.sBankName, ' / ', h.sBrBankNm) "                                       
+                + " WHEN (l.sBrInsIDx != NULL || TRIM(l.sBrInsIDx) != '' )THEN CONCAT(o.sInsurNme, ' / ', l.sBrInsNme) "                                       
                 + " ELSE b.sCompnyNm   END AS sBuyCltNm "                                                                                                    
                 + " , CASE "                                                                                                                                 
-                + " WHEN (h.sBrBankID != NULL || TRIM(h.sBrBankID) != '' )THEN CONCAT(IFNULL(h.sAddressx, ''), i.sTownName, j.sProvName) "                   
-                + " WHEN (l.sBrInsIDx != NULL || TRIM(l.sBrInsIDx) != '' )THEN CONCAT(IFNULL(l.sAddressx, ''), m.sTownName, n.sProvName) "                   
+                + " WHEN (h.sBrBankID != NULL || TRIM(h.sBrBankID) != '' )THEN TRIM(CONCAT_WS(' ',IFNULL(h.sAddressx, ''), i.sTownName, j.sProvName)) "                   
+                + " WHEN (l.sBrInsIDx != NULL || TRIM(l.sBrInsIDx) != '' )THEN TRIM(CONCAT_WS(' ',IFNULL(l.sAddressx, ''), m.sTownName, n.sProvName)) "                   
                 + " ELSE TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), IFNULL(CONCAT(d.sAddressx,' ') , ''), "                                   
                 + " IFNULL(CONCAT(e.sBrgyName,' '), ''),   IFNULL(CONCAT(f.sTownName, ', '),''), IFNULL(CONCAT(g.sProvName),'') )	, ''))   END AS sAddressx "
                 
@@ -499,6 +504,27 @@ public class Model_SalesInvoice_Master implements GEntity {
                 + " LEFT JOIN towncity m ON m.sTownIDxx = l.sTownIDxx "                    
                 + " LEFT JOIN province n ON n.sProvIDxx = m.sProvIDxx "                    
                 + " LEFT JOIN insurance_company o ON o.sInsurIDx = l.sInsurIDx "           ;                           
+    }
+    
+    private static String xsDateShort(Date fdValue) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String date = sdf.format(fdValue);
+        return date;
+    }
+
+    private static String xsDateShort(String fsValue) throws org.json.simple.parser.ParseException, java.text.ParseException {
+        SimpleDateFormat fromUser = new SimpleDateFormat("MMMM dd, yyyy");
+        SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String lsResult = "";
+        lsResult = myFormat.format(fromUser.parse(fsValue));
+        return lsResult;
+    }
+    
+    /*Convert Date to String*/
+    private LocalDate strToDate(String val) {
+        DateTimeFormatter date_formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDate = LocalDate.parse(val, date_formatter);
+        return localDate;
     }
     
     /**
@@ -549,12 +575,29 @@ public class Model_SalesInvoice_Master implements GEntity {
      * @return The Value of this record.
      */
     public Date getTransactDte() {
+        
         Date date = null;
-        if(!getValue("dTransact").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("dTransact").toString());
+//        if(!getValue("dTransact").toString().isEmpty()){
+//            date = CommonUtils.toDate(getValue("dTransact").toString());
+//        }
+        
+        if(getValue("dTransact") == null || getValue("dTransact").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("dTransact")), SQLUtil.FORMAT_SHORT_DATE);
         }
         
         return date;
+    }
+    
+    /**
+     * @return The Value of this record.
+     */
+    public String getOrigTransactDte() {
+        if(psOrigTransDte.equals("1900-01-01")){
+            psOrigTransDte = xsDateShort(poGRider.getServerDate());
+        }
+        return psOrigTransDte;
     }
     
     /**
